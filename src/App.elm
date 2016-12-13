@@ -33,6 +33,10 @@ type alias Model =
     }
 
 
+type alias DeltaTime =
+    Float
+
+
 initialModel : Model
 initialModel =
     { canvasSize = { width = 0, height = 0 }
@@ -49,7 +53,7 @@ init =
 type Msg
     = NoOp
     | SetCanvasSize Window.Size
-    | Tick Float
+    | Tick DeltaTime
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -73,7 +77,7 @@ update msg model =
             )
 
 
-updatePlayer : Float -> Player -> Player
+updatePlayer : DeltaTime -> Player -> Player
 updatePlayer dt player =
     let
         gravity =
