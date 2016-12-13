@@ -46,12 +46,12 @@ initialModel =
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, Task.perform (\size -> SetSvgCanvasSize size) Window.size )
+    ( initialModel, Task.perform (\size -> SetCanvasSize size) Window.size )
 
 
 type Msg
     = NoOp
-    | SetSvgCanvasSize Window.Size
+    | SetCanvasSize Window.Size
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -60,7 +60,7 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        SetSvgCanvasSize size ->
+        SetCanvasSize size ->
             ( { model
                 | canvasSize = size
               }
@@ -96,4 +96,4 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Window.resizes (\size -> SetSvgCanvasSize size)
+    Window.resizes (\size -> SetCanvasSize size)
