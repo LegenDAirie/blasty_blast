@@ -3,6 +3,8 @@ module App exposing (..)
 import Html exposing (Html, div)
 import Collage exposing (collage)
 import Element exposing (toHtml)
+import Vector2 as V2
+import AnimationFrame
 import Window
 import Task
 import Draw exposing (sizeCanvas, backgroundColor, drawPlayer, drawBarrel)
@@ -25,8 +27,7 @@ type alias Barrel =
 
 
 type alias Model =
-    { message : String
-    , canvasSize : Window.Size
+    { canvasSize : Window.Size
     , player : Player
     , barrel : Barrel
     }
@@ -34,8 +35,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { message = "Your Elm App is working!"
-    , canvasSize = { width = 0, height = 0 }
+    { canvasSize = { width = 0, height = 0 }
     , player = Player ( -100, 100 ) ( 0, 0 )
     , barrel = Barrel ( -100, -100 ) <| pi / 4
     }
@@ -49,6 +49,7 @@ init =
 type Msg
     = NoOp
     | SetCanvasSize Window.Size
+    | Tick Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -63,6 +64,28 @@ update msg model =
               }
             , Cmd.none
             )
+
+        Tick dt ->
+            ( { model
+                | player = updatePlayer dt model.player
+              }
+            , Cmd.none
+            )
+
+
+updatePlayer : Float -> Player -> Player
+updatePlayer dt player =
+    let
+        gravity =
+            V2.scale dt ( 0, -0.1 )
+
+        newVelocity =
+            V2.add player.velocity gravity
+    in
+        { player
+            | location = V2.add player.location newVelocity
+            , velocity = newVelocity
+        }
 
 
 view : Model -> Html Msg
@@ -88,4 +111,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Window.resizes (\size -> SetCanvasSize size)
+    Sub.batch
+        [ AnimationFrame.diffs Tick
+        , Window.resizes (\size -> SetCanvasSize size)
+        ]
