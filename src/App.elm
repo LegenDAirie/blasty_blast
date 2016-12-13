@@ -2,9 +2,10 @@ module App exposing (..)
 
 import Html exposing (Html, text, div)
 import Html.Attributes exposing (style)
-import Svg exposing (rect, svg)
-import Svg.Attributes exposing (x, y, width, height, viewBox)
+import Collage exposing (collage, rect, filled, move, scale, rotate)
+import Element exposing (toHtml)
 import Vector2 as V2 exposing (Vec2, Float2)
+import Color exposing (rgb)
 import Window
 import Task
 
@@ -69,48 +70,38 @@ update msg model =
 view : Model -> Html Msg
 view model =
     let
-        ( svgCanvasWidth, svgCanvasHeight ) =
+        ( canvasWidth, canvasHeight ) =
             sizeSvgCanvas model.svgCanvasSize
 
-        ( playerX, playerY ) =
+        location =
             model.player.location
 
         ( barrelX, barrelY ) =
             model.barrel.location
     in
-        div []
-            [ svg
-                [ width svgCanvasWidth, height svgCanvasHeight, viewBox "0 0 1280 720" ]
-                [ rect
-                    [ x <| toString <| playerX
-                    , y <| toString <| playerY
-                    , width "100"
-                    , height "100"
+        div [ style [ ( "backgroundColor", "#333" ) ] ]
+            [ toHtml <|
+                collage canvasWidth
+                    canvasHeight
+                    [ rect 75 75
+                        |> filled (rgb 60 100 60)
+                        |> move location
+                        |> scale (toFloat canvasWidth / 1280)
+                        |> rotate (pi / 4)
                     ]
-                    []
-                , rect
-                    [ x <| toString <| barrelX
-                    , y <| toString <| barrelY
-                    , width "200"
-                    , height "300"
-                    ]
-                    []
-                ]
             ]
 
 
-sizeSvgCanvas : Window.Size -> ( String, String )
+sizeSvgCanvas : Window.Size -> ( Int, Int )
 sizeSvgCanvas size =
     let
         width =
-            toString <|
-                min size.width <|
-                    floor (16 / 9 * toFloat size.height)
+            min size.width <|
+                floor (16 / 9 * toFloat size.height)
 
         height =
-            toString <|
-                min size.height <|
-                    floor (9 / 16 * toFloat size.width)
+            min size.height <|
+                floor (9 / 16 * toFloat size.width)
     in
         ( width, height )
 
