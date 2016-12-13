@@ -1,11 +1,8 @@
 module App exposing (..)
 
-import Html exposing (Html, text, div)
-import Html.Attributes exposing (style, id)
-import Collage exposing (collage, rect, filled, move, scale, rotate, Form)
+import Html exposing (Html, div)
+import Collage exposing (collage)
 import Element exposing (toHtml)
-import Vector2 as V2 exposing (Vec2, Float2)
-import Color exposing (rgb, darkCharcoal)
 import Window
 import Task
 import Draw exposing (sizeCanvas, backgroundColor, drawPlayer, drawBarrel)
@@ -74,22 +71,17 @@ view model =
         ( canvasWidth, canvasHeight ) =
             sizeCanvas model.canvasSize
 
-        gameElementScale =
+        gameScale =
             toFloat canvasWidth / 1280
-
-        location =
-            model.player.location
-
-        ( barrelX, barrelY ) =
-            model.barrel.location
     in
         div []
             [ toHtml <|
-                collage canvasWidth
+                collage
+                    canvasWidth
                     canvasHeight
                     [ backgroundColor canvasWidth canvasHeight
-                    , drawPlayer model.player gameElementScale
-                    , drawBarrel model.barrel gameElementScale
+                    , drawPlayer model.player gameScale
+                    , drawBarrel model.barrel gameScale
                     ]
             ]
 
