@@ -8,6 +8,7 @@ import Vector2 as V2 exposing (Vec2, Float2)
 import Color exposing (rgb, darkCharcoal)
 import Window
 import Task
+import Draw exposing (sizeCanvas, backgroundColor, drawPlayer, drawBarrel)
 
 
 type alias Vector =
@@ -28,7 +29,7 @@ type alias Barrel =
 
 type alias Model =
     { message : String
-    , svgCanvasSize : Window.Size
+    , canvasSize : Window.Size
     , player : Player
     , barrel : Barrel
     }
@@ -37,7 +38,7 @@ type alias Model =
 initialModel : Model
 initialModel =
     { message = "Your Elm App is working!"
-    , svgCanvasSize = { width = 0, height = 0 }
+    , canvasSize = { width = 0, height = 0 }
     , player = Player ( -100, 100 ) ( 0, 0 )
     , barrel = Barrel ( -100, -100 ) <| pi / 4
     }
@@ -61,7 +62,7 @@ update msg model =
 
         SetSvgCanvasSize size ->
             ( { model
-                | svgCanvasSize = size
+                | canvasSize = size
               }
             , Cmd.none
             )
@@ -71,7 +72,7 @@ view : Model -> Html Msg
 view model =
     let
         ( canvasWidth, canvasHeight ) =
-            sizeCanvas model.svgCanvasSize
+            sizeCanvas model.canvasSize
 
         gameElementScale =
             toFloat canvasWidth / 1280
@@ -91,43 +92,6 @@ view model =
                     , drawBarrel model.barrel gameElementScale
                     ]
             ]
-
-
-backgroundColor : Int -> Int -> Form
-backgroundColor width height =
-    rect (toFloat width) (toFloat height)
-        |> filled darkCharcoal
-
-
-drawPlayer : Player -> Float -> Form
-drawPlayer player elementScale =
-    rect 75 75
-        |> filled (rgb 60 100 60)
-        |> move (V2.scale elementScale player.location)
-        |> scale elementScale
-
-
-drawBarrel : Barrel -> Float -> Form
-drawBarrel barrel elementScale =
-    rect 100 75
-        |> filled (rgb 60 100 60)
-        |> move (V2.scale elementScale barrel.location)
-        |> scale elementScale
-        |> rotate (pi / 4)
-
-
-sizeCanvas : Window.Size -> ( Int, Int )
-sizeCanvas size =
-    let
-        width =
-            min size.width <|
-                floor (16 / 9 * toFloat size.height)
-
-        height =
-            min size.height <|
-                floor (9 / 16 * toFloat size.width)
-    in
-        ( width, height )
 
 
 subscriptions : Model -> Sub Msg
