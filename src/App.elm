@@ -1,8 +1,8 @@
 module App exposing (..)
 
 import Html exposing (Html, text, div)
-import Html.Attributes exposing (style)
-import Collage exposing (collage, rect, filled, move, scale, rotate)
+import Html.Attributes exposing (style, id)
+import Collage exposing (collage, rect, filled, move, scale, rotate, Form)
 import Element exposing (toHtml)
 import Vector2 as V2 exposing (Vec2, Float2)
 import Color exposing (rgb)
@@ -38,8 +38,8 @@ initialModel : Model
 initialModel =
     { message = "Your Elm App is working!"
     , svgCanvasSize = { width = 0, height = 0 }
-    , player = Player ( 0, 0 ) ( 0, 0 )
-    , barrel = Barrel ( 200, 400 ) <| pi / 4
+    , player = Player ( -100, 100 ) ( 0, 0 )
+    , barrel = Barrel ( -100, -100 ) <| pi / 4
     }
 
 
@@ -71,7 +71,10 @@ view : Model -> Html Msg
 view model =
     let
         ( canvasWidth, canvasHeight ) =
-            sizeSvgCanvas model.svgCanvasSize
+            sizeCanvas model.svgCanvasSize
+
+        gameElementScale =
+            toFloat canvasWidth / 1280
 
         location =
             model.player.location
@@ -79,21 +82,35 @@ view model =
         ( barrelX, barrelY ) =
             model.barrel.location
     in
-        div [ style [ ( "backgroundColor", "#333" ) ] ]
+        div []
             [ toHtml <|
                 collage canvasWidth
                     canvasHeight
-                    [ rect 75 75
-                        |> filled (rgb 60 100 60)
-                        |> move location
-                        |> scale (toFloat canvasWidth / 1280)
-                        |> rotate (pi / 4)
+                    [ drawPlayer model.player gameElementScale
+                    , drawBarrel model.barrel gameElementScale
                     ]
             ]
 
 
-sizeSvgCanvas : Window.Size -> ( Int, Int )
-sizeSvgCanvas size =
+drawPlayer : Player -> Float -> Form
+drawPlayer player elementScale =
+    rect 75 75
+        |> filled (rgb 60 100 60)
+        |> move player.location
+        |> scale elementScale
+
+
+drawBarrel : Barrel -> Float -> Form
+drawBarrel barrel elementScale =
+    rect 100 75
+        |> filled (rgb 60 100 60)
+        |> move barrel.location
+        |> scale elementScale
+        |> rotate (pi / 4)
+
+
+sizeCanvas : Window.Size -> ( Int, Int )
+sizeCanvas size =
     let
         width =
             min size.width <|
