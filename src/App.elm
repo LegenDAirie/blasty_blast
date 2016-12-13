@@ -5,7 +5,7 @@ import Html.Attributes exposing (style, id)
 import Collage exposing (collage, rect, filled, move, scale, rotate, Form)
 import Element exposing (toHtml)
 import Vector2 as V2 exposing (Vec2, Float2)
-import Color exposing (rgb)
+import Color exposing (rgb, darkCharcoal)
 import Window
 import Task
 
@@ -86,17 +86,24 @@ view model =
             [ toHtml <|
                 collage canvasWidth
                     canvasHeight
-                    [ drawPlayer model.player gameElementScale
+                    [ backgroundColor canvasWidth canvasHeight
+                    , drawPlayer model.player gameElementScale
                     , drawBarrel model.barrel gameElementScale
                     ]
             ]
+
+
+backgroundColor : Int -> Int -> Form
+backgroundColor width height =
+    rect (toFloat width) (toFloat height)
+        |> filled darkCharcoal
 
 
 drawPlayer : Player -> Float -> Form
 drawPlayer player elementScale =
     rect 75 75
         |> filled (rgb 60 100 60)
-        |> move player.location
+        |> move (V2.scale elementScale player.location)
         |> scale elementScale
 
 
@@ -104,7 +111,7 @@ drawBarrel : Barrel -> Float -> Form
 drawBarrel barrel elementScale =
     rect 100 75
         |> filled (rgb 60 100 60)
-        |> move barrel.location
+        |> move (V2.scale elementScale barrel.location)
         |> scale elementScale
         |> rotate (pi / 4)
 
