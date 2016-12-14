@@ -1,13 +1,14 @@
 module App exposing (..)
 
 import Html exposing (Html, div)
-import Collage exposing (collage)
+import Collage exposing (collage, groupTransform)
+import Transform exposing (identity, rotation, translation)
 import Element exposing (toHtml)
 import Vector2 as V2
 import AnimationFrame
 import Window
 import Task
-import Draw exposing (sizeCanvas, backgroundColor, drawPlayer, drawBarrel)
+import Draw exposing (sizeCanvas, canvasBackground, drawPlayer, drawBarrel)
 
 
 type alias Vector =
@@ -27,7 +28,7 @@ type alias Barrel =
 
 
 type alias Model =
-    { canvasSize : Window.Size
+    { windowSize : Window.Size
     , player : Player
     , barrel : Barrel
     }
@@ -39,7 +40,7 @@ type alias DeltaTime =
 
 initialModel : Model
 initialModel =
-    { canvasSize = { width = 0, height = 0 }
+    { windowSize = { width = 0, height = 0 }
     , player = Player ( -100, 100 ) ( 0, 0 )
     , barrel = Barrel ( -100, -100 ) <| pi / 4
     }
@@ -64,7 +65,7 @@ update msg model =
 
         SetCanvasSize size ->
             ( { model
-                | canvasSize = size
+                | windowSize = size
               }
             , Cmd.none
             )
@@ -81,7 +82,7 @@ updatePlayer : DeltaTime -> Player -> Player
 updatePlayer dt player =
     let
         gravity =
-            V2.scale dt ( 0, -0.001 )
+            V2.scale dt ( 0, 0 )
 
         newVelocity =
             V2.add player.velocity gravity
@@ -96,19 +97,22 @@ view : Model -> Html Msg
 view model =
     let
         ( canvasWidth, canvasHeight ) =
-            sizeCanvas model.canvasSize
+            sizeCanvas model.windowSize
 
         gameScale =
-            toFloat canvasWidth / 1280
+            toFloat canvasHeight / 720
     in
         div []
             [ toHtml <|
                 collage
                     canvasWidth
                     canvasHeight
-                    [ backgroundColor canvasWidth canvasHeight
-                    , drawPlayer model.player gameScale
-                    , drawBarrel model.barrel gameScale
+                    [ groupTransform
+                        (Transform.scale gameScale)
+                        [ canvasBackground
+                        , drawPlayer model.player
+                        , drawBarrel model.barrel
+                        ]
                     ]
             ]
 
