@@ -101,14 +101,16 @@ view model =
 
         gameScale =
             toFloat canvasHeight / 720
+
+        gameTransformation =
+            Transform.scale gameScale
     in
         div []
             [ toHtml <|
                 collage
                     canvasWidth
                     canvasHeight
-                    [ groupTransform
-                        (Transform.scale gameScale)
+                    [ groupTransform gameTransformation
                         [ canvasBackground
                         , drawPlayer model.player
                         , drawBarrel model.barrel

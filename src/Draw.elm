@@ -60,6 +60,7 @@ drawBarrel barrel =
         [ rect 100 75
             |> outlined (solid (rgb 60 100 60))
             |> move barrel.location
+            |> rotate barrel.angle
         , center barrel.location
         , collisionCircle barrel.location 100 75
         ]
