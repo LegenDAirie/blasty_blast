@@ -81,7 +81,7 @@ updatePlayer : DeltaTime -> Player -> Player
 updatePlayer dt player =
     let
         gravity =
-            V2.scale dt ( 0, -0.1 )
+            V2.scale dt ( 0, -0.001 )
 
         newVelocity =
             V2.add player.velocity gravity
