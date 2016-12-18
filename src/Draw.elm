@@ -1,9 +1,7 @@
 module Draw exposing (..)
 
 import Collage exposing (Form, rect, circle, traced, filled, move, moveX, rotate, group, solid, outlined)
-import Transform exposing (rotation)
 import Color exposing (rgb, white, black)
-import Vector2 as V2
 import Window
 
 
@@ -14,12 +12,14 @@ type alias Vector =
 type alias Player =
     { location : Vector
     , velocity : Vector
+    , collisionRadius : Int
     }
 
 
 type alias Barrel =
     { location : Vector
     , angle : Float
+    , collisionRadius : Int
     }
 
 
@@ -36,8 +36,8 @@ center location =
         |> move location
 
 
-collisionCircle : Vector -> Int -> Int -> Form
-collisionCircle location width height =
+collisionCircle : Vector -> Int -> Form
+collisionCircle location height =
     circle (toFloat height / 2)
         |> outlined (solid black)
         |> move location
@@ -50,7 +50,7 @@ drawPlayer player =
             |> outlined (solid (rgb 255 128 128))
             |> move player.location
         , center player.location
-        , collisionCircle player.location 75 75
+        , collisionCircle player.location player.collisionRadius
         ]
 
 
@@ -62,7 +62,7 @@ drawBarrel barrel =
             |> move barrel.location
             |> rotate barrel.angle
         , center barrel.location
-        , collisionCircle barrel.location 100 75
+        , collisionCircle barrel.location barrel.collisionRadius
         ]
 
 
