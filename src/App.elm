@@ -81,7 +81,7 @@ update msg model =
 
         Tick dt ->
             ( { model
-                | player = updatePlayer dt model.player
+                | player = updatePlayer dt model.controling model.player
               }
             , Cmd.none
             )
@@ -99,8 +99,8 @@ hasCollided player barrel =
         distanceBetween < toFloat collectiveRadius
 
 
-updatePlayer : DeltaTime -> Player -> Player
-updatePlayer dt player =
+updatePlayer : DeltaTime -> ActiveElement -> Player -> Player
+updatePlayer dt activeElement player =
     let
         gravity =
             V2.scale dt ( 0, 0 )
@@ -108,10 +108,18 @@ updatePlayer dt player =
         newVelocity =
             V2.add player.velocity gravity
     in
-        { player
-            | location = V2.add player.location newVelocity
-            , velocity = newVelocity
-        }
+        case activeElement of
+            ThePlayer ->
+                { player
+                    | location = V2.add player.location newVelocity
+                    , velocity = newVelocity
+                }
+
+            ThisBarrel barrel ->
+                { player
+                    | location = barrel.location
+                    , velocity = ( 0, 0 )
+                }
 
 
 view : Model -> Html Msg
