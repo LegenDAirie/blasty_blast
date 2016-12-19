@@ -4,7 +4,7 @@ import Html exposing (Html, div)
 import Collage exposing (collage, groupTransform)
 import Transform exposing (identity, rotation, translation)
 import Element exposing (toHtml)
-import Vector2 as V2
+import Vector2 as V2 exposing (distance)
 import AnimationFrame
 import Window
 import Task
@@ -18,12 +18,14 @@ type alias Vector =
 type alias Player =
     { location : Vector
     , velocity : Vector
+    , collisionRadius : Int
     }
 
 
 type alias Barrel =
     { location : Vector
     , angle : Float
+    , collisionRadius : Int
     }
 
 
@@ -41,8 +43,8 @@ type alias DeltaTime =
 initialModel : Model
 initialModel =
     { windowSize = { width = 0, height = 0 }
-    , player = Player ( -100, 100 ) ( 0, 0 )
-    , barrel = Barrel ( -100, -100 ) <| pi / 4
+    , player = Player ( -100, 100 ) ( 0, 0 ) 75
+    , barrel = Barrel ( -100, -100 ) (pi / 4) 75
     }
 
 
@@ -76,6 +78,18 @@ update msg model =
               }
             , Cmd.none
             )
+
+
+hasCollided : Player -> Barrel -> Bool
+hasCollided player barrel =
+    let
+        distanceBetween =
+            distance player.location barrel.location
+
+        collectiveRadius =
+            player.collisionRadius + barrel.collisionRadius
+    in
+        distanceBetween < toFloat collectiveRadius
 
 
 updatePlayer : DeltaTime -> Player -> Player
