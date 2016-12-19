@@ -33,7 +33,13 @@ type alias Model =
     { windowSize : Window.Size
     , player : Player
     , barrel : Barrel
+    , controling : ActiveElement
     }
+
+
+type ActiveElement
+    = ThePlayer
+    | ThisBarrel Barrel
 
 
 type alias DeltaTime =
@@ -45,6 +51,7 @@ initialModel =
     { windowSize = { width = 0, height = 0 }
     , player = Player ( -100, 100 ) ( 0, 0 ) 75
     , barrel = Barrel ( -100, -100 ) (pi / 4) 75
+    , controling = ThePlayer
     }
 
 
