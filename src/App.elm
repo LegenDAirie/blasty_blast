@@ -49,8 +49,8 @@ type alias DeltaTime =
 initialModel : Model
 initialModel =
     { windowSize = { width = 0, height = 0 }
-    , player = Player ( -100, 100 ) ( 0, 0 ) 75
-    , barrel = Barrel ( -100, -100 ) (pi / 4) 75
+    , player = Player ( -100, 100 ) ( 0, 0 ) 35
+    , barrel = Barrel ( -100, -100 ) (pi / 4) 35
     , controling = ThePlayer
     }
 
@@ -82,9 +82,18 @@ update msg model =
         Tick dt ->
             ( { model
                 | player = updatePlayer dt model.controling model.player
+                , controling = calculateActiveElement model.player model.barrel
               }
             , Cmd.none
             )
+
+
+calculateActiveElement : Player -> Barrel -> ActiveElement
+calculateActiveElement player barrel =
+    if hasCollided player barrel then
+        ThisBarrel barrel
+    else
+        ThePlayer
 
 
 hasCollided : Player -> Barrel -> Bool
@@ -103,7 +112,7 @@ updatePlayer : DeltaTime -> ActiveElement -> Player -> Player
 updatePlayer dt activeElement player =
     let
         gravity =
-            V2.scale dt ( 0, 0 )
+            V2.scale dt ( 0, -0.001 )
 
         newVelocity =
             V2.add player.velocity gravity

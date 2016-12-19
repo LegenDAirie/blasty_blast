@@ -37,8 +37,9 @@ center location =
 
 
 collisionCircle : Vector -> Int -> Form
-collisionCircle location height =
-    circle (toFloat height / 2)
+collisionCircle location radius =
+    toFloat radius
+        |> circle
         |> outlined (solid black)
         |> move location
 
