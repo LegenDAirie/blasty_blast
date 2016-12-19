@@ -4,7 +4,8 @@ import Html exposing (Html, div)
 import Collage exposing (collage, groupTransform)
 import Transform exposing (identity, rotation, translation)
 import Element exposing (toHtml)
-import Vector2 as V2 exposing (distance)
+import Vector2 as V2 exposing (distance, normalize)
+import Keyboard exposing (KeyCode, presses)
 import AnimationFrame
 import Window
 import Task
@@ -33,13 +34,20 @@ type alias Model =
     { windowSize : Window.Size
     , player : Player
     , barrel : Barrel
-    , controling : ActiveElement
+    , active : ActiveElement
+    , move : Move
     }
 
 
 type ActiveElement
     = ThePlayer
     | ThisBarrel Barrel
+
+
+type Move
+    = GoLeft
+    | GoRight
+    | GoWithTheFlow
 
 
 type alias DeltaTime =
@@ -51,7 +59,8 @@ initialModel =
     { windowSize = { width = 0, height = 0 }
     , player = Player ( -100, 100 ) ( 0, 0 ) 35
     , barrel = Barrel ( -100, -100 ) (pi / 4) 35
-    , controling = ThePlayer
+    , active = ThePlayer
+    , move = GoWithTheFlow
     }
 
 
@@ -64,11 +73,13 @@ type Msg
     = NoOp
     | SetCanvasSize Window.Size
     | Tick DeltaTime
+    | KeyPress KeyCode
+    | KeyRelease KeyCode
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
+    case Debug.log "msg" msg of
         NoOp ->
             ( model, Cmd.none )
 
@@ -81,8 +92,31 @@ update msg model =
 
         Tick dt ->
             ( { model
-                | player = updatePlayer dt model.controling model.player
-                , controling = calculateActiveElement model.player model.barrel
+                | player = updatePlayer dt model.active model.player model.move
+                , active = calculateActiveElement model.player model.barrel
+              }
+            , Cmd.none
+            )
+
+        KeyPress code ->
+            let
+                getMoving =
+                    if code == 65 then
+                        GoLeft
+                    else if code == 68 then
+                        GoRight
+                    else
+                        GoWithTheFlow
+            in
+                ( { model
+                    | move = getMoving
+                  }
+                , Cmd.none
+                )
+
+        KeyRelease code ->
+            ( { model
+                | move = GoWithTheFlow
               }
             , Cmd.none
             )
@@ -108,14 +142,39 @@ hasCollided player barrel =
         distanceBetween < toFloat collectiveRadius
 
 
-updatePlayer : DeltaTime -> ActiveElement -> Player -> Player
-updatePlayer dt activeElement player =
+capMagnitude : Float -> Vector -> Vector
+capMagnitude maxSpeed vector =
+    if (V2.length vector) > maxSpeed then
+        vector
+            |> normalize
+            |> V2.scale maxSpeed
+    else
+        vector
+
+
+updatePlayer : DeltaTime -> ActiveElement -> Player -> Move -> Player
+updatePlayer dt activeElement player moveDirection =
     let
         gravity =
             V2.scale dt ( 0, -0.001 )
 
+        moveForce =
+            V2.scale dt <|
+                case (Debug.log "Move Direction" moveDirection) of
+                    GoLeft ->
+                        ( -0.1, 0 )
+
+                    GoRight ->
+                        ( 0.1, 0 )
+
+                    GoWithTheFlow ->
+                        ( 0, 0 )
+
         newVelocity =
-            V2.add player.velocity gravity
+            player.velocity
+                |> V2.add gravity
+                |> V2.add moveForce
+                |> capMagnitude 3
     in
         case activeElement of
             ThePlayer ->
@@ -162,4 +221,6 @@ subscriptions model =
     Sub.batch
         [ AnimationFrame.diffs Tick
         , Window.resizes (\size -> SetCanvasSize size)
+        , Keyboard.downs (\keyCode -> KeyPress keyCode)
+        , Keyboard.ups (\keyCode -> KeyRelease keyCode)
         ]
