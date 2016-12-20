@@ -4,7 +4,7 @@ import Html exposing (Html, div)
 import Collage exposing (collage, groupTransform)
 import Transform exposing (identity, rotation, translation)
 import Element exposing (toHtml)
-import Vector2 as V2 exposing (distance, normalize)
+import Vector2 as V2 exposing (distance, normalize, setX)
 import Keyboard exposing (KeyCode, presses)
 import AnimationFrame
 import Window
@@ -79,7 +79,7 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case Debug.log "msg" msg of
+    case msg of
         NoOp ->
             ( model, Cmd.none )
 
@@ -142,30 +142,38 @@ hasCollided player barrel =
         distanceBetween < toFloat collectiveRadius
 
 
-capMagnitude : Float -> Vector -> Vector
-capMagnitude maxSpeed vector =
-    if (V2.length vector) > maxSpeed then
-        vector
-            |> normalize
-            |> V2.scale maxSpeed
+capHorizontalVelocity : Float -> Vector -> Vector
+capHorizontalVelocity maxSpeed ( x, y ) =
+    if x > maxSpeed then
+        ( maxSpeed, y )
+    else if x < -maxSpeed then
+        ( -maxSpeed, y )
     else
-        vector
+        ( x, y )
+
+
+capVerticalVelocity : Float -> Vector -> Vector
+capVerticalVelocity maxSpeed ( x, y ) =
+    if y < -maxSpeed then
+        ( x, -maxSpeed )
+    else
+        ( x, y )
 
 
 updatePlayer : DeltaTime -> ActiveElement -> Player -> Move -> Player
 updatePlayer dt activeElement player moveDirection =
     let
         gravity =
-            V2.scale dt ( 0, -0.001 )
+            V2.scale dt ( 0, -0.01 )
 
         moveForce =
             V2.scale dt <|
-                case (Debug.log "Move Direction" moveDirection) of
+                case moveDirection of
                     GoLeft ->
-                        ( -0.1, 0 )
+                        ( -0.01, 0 )
 
                     GoRight ->
-                        ( 0.1, 0 )
+                        ( 0.01, 0 )
 
                     GoWithTheFlow ->
                         ( 0, 0 )
@@ -174,7 +182,11 @@ updatePlayer dt activeElement player moveDirection =
             player.velocity
                 |> V2.add gravity
                 |> V2.add moveForce
-                |> capMagnitude 3
+                |> capHorizontalVelocity 3
+                |> capVerticalVelocity 10
+
+        _ =
+            Debug.log "velocity" newVelocity
     in
         case activeElement of
             ThePlayer ->
