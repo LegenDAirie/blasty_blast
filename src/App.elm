@@ -164,7 +164,7 @@ updatePlayer : DeltaTime -> ActiveElement -> Player -> Move -> Player
 updatePlayer dt activeElement player moveDirection =
     let
         gravity =
-            V2.scale dt ( 0, -0.01 )
+            V2.scale dt ( 0, -0.001 )
 
         moveForce =
             V2.scale dt <|
@@ -182,11 +182,8 @@ updatePlayer dt activeElement player moveDirection =
             player.velocity
                 |> V2.add gravity
                 |> V2.add moveForce
-                |> capHorizontalVelocity 3
+                |> capHorizontalVelocity 10
                 |> capVerticalVelocity 10
-
-        _ =
-            Debug.log "velocity" newVelocity
     in
         case activeElement of
             ThePlayer ->
