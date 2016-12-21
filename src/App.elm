@@ -75,6 +75,7 @@ type Msg
     | Tick DeltaTime
     | KeyPress KeyCode
     | KeyRelease KeyCode
+    | Fire
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -120,6 +121,25 @@ update msg model =
               }
             , Cmd.none
             )
+
+        Fire ->
+            case model.active of
+                ThePlayer ->
+                    ( model, Cmd.none )
+
+                ThisBarrel barrel ->
+                    ( { model
+                        | player = fireFromBarrel barrel model.player
+                      }
+                    , Cmd.none
+                    )
+
+
+fireFromBarrel : Barrel -> Player -> Player
+fireFromBarrel barrel player =
+    { player
+        | location = ( 100, 100 )
+    }
 
 
 calculateActiveElement : Player -> Barrel -> ActiveElement
