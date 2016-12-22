@@ -1,11 +1,12 @@
 module App exposing (..)
 
 import Html exposing (Html, div)
+import Html.Attributes exposing (style)
+import Html.Events exposing (onClick, onMouseDown, onMouseUp)
 import Collage exposing (collage, groupTransform)
 import Transform exposing (identity, rotation, translation)
 import Element exposing (toHtml)
 import Vector2 as V2 exposing (distance, normalize, setX)
-import Keyboard exposing (KeyCode, presses)
 import AnimationFrame
 import Window
 import Task
@@ -73,8 +74,9 @@ type Msg
     = NoOp
     | SetCanvasSize Window.Size
     | Tick DeltaTime
-    | KeyPress KeyCode
-    | KeyRelease KeyCode
+    | MoveLeft
+    | MoveRight
+    | DontMove
     | Fire
 
 
@@ -99,28 +101,38 @@ update msg model =
             , Cmd.none
             )
 
-        KeyPress code ->
+        MoveLeft ->
             let
-                getMoving =
-                    if code == 65 then
-                        GoLeft
-                    else if code == 68 then
-                        GoRight
-                    else
-                        GoWithTheFlow
+                _ =
+                    Debug.log "MoveLeft" 1
             in
                 ( { model
-                    | move = getMoving
+                    | move = GoLeft
                   }
                 , Cmd.none
                 )
 
-        KeyRelease code ->
-            ( { model
-                | move = GoWithTheFlow
-              }
-            , Cmd.none
-            )
+        MoveRight ->
+            let
+                _ =
+                    Debug.log "MoveRight" 1
+            in
+                ( { model
+                    | move = GoRight
+                  }
+                , Cmd.none
+                )
+
+        DontMove ->
+            let
+                _ =
+                    Debug.log "DontMove" 1
+            in
+                ( { model
+                    | move = GoWithTheFlow
+                  }
+                , Cmd.none
+                )
 
         Fire ->
             case model.active of
@@ -225,23 +237,67 @@ view model =
         ( canvasWidth, canvasHeight ) =
             sizeCanvas model.windowSize
 
+        fireButtonWidth =
+            toFloat canvasWidth * 0.7
+
+        leftRightButtonWidth =
+            toFloat canvasWidth * 0.15
+
         gameScale =
             toFloat canvasHeight / 720
 
         gameTransformation =
             Transform.scale gameScale
+
+        fireButtonStyle =
+            style
+                [ ( "position", "absolute" )
+                , ( "left", toString leftRightButtonWidth ++ "px" )
+                , ( "width", toString fireButtonWidth ++ "px" )
+                , ( "height", toString canvasHeight ++ "px" )
+                , ( "border", "1px solid red" )
+                ]
+
+        leftButtonStyle =
+            style
+                [ ( "position", "absolute" )
+                , ( "width", toString leftRightButtonWidth ++ "px" )
+                , ( "height", toString canvasHeight ++ "px" )
+                , ( "border", "1px solid red" )
+                ]
+
+        rightButtonStyle =
+            style
+                [ ( "position", "absolute" )
+                , ( "left", toString (leftRightButtonWidth + fireButtonWidth) ++ "px" )
+                , ( "width", toString leftRightButtonWidth ++ "px" )
+                , ( "height", toString canvasHeight ++ "px" )
+                , ( "border", "1px solid red" )
+                ]
+
+        canvasContainer =
+            style
+                [ ( "display", "flex" ) ]
     in
         div []
-            [ toHtml <|
-                collage
-                    canvasWidth
-                    canvasHeight
-                    [ groupTransform gameTransformation
-                        [ canvasBackground
-                        , drawPlayer model.player
-                        , drawBarrel model.barrel
+            [ div [ canvasContainer ]
+                [ toHtml <|
+                    collage
+                        canvasWidth
+                        canvasHeight
+                        [ groupTransform gameTransformation
+                            [ canvasBackground
+                            , drawPlayer model.player
+                            , drawBarrel model.barrel
+                            ]
                         ]
-                    ]
+                , div [ leftButtonStyle, onMouseDown MoveLeft, onMouseUp DontMove ]
+                    []
+                , div [ fireButtonStyle, onMouseDown Fire ]
+                    []
+                , div [ rightButtonStyle, onMouseDown MoveRight, onMouseUp DontMove ]
+                    []
+                ]
             ]
 
 
@@ -250,6 +306,4 @@ subscriptions model =
     Sub.batch
         [ AnimationFrame.diffs Tick
         , Window.resizes (\size -> SetCanvasSize size)
-        , Keyboard.downs (\keyCode -> KeyPress keyCode)
-        , Keyboard.ups (\keyCode -> KeyRelease keyCode)
         ]
