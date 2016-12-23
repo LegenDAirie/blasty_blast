@@ -106,22 +106,40 @@ update msg model =
                 _ =
                     Debug.log "MoveLeft" 1
             in
-                ( { model
-                    | move = GoLeft
-                  }
-                , Cmd.none
-                )
+                case model.active of
+                    ThePlayer ->
+                        ( { model
+                            | move = GoLeft
+                          }
+                        , Cmd.none
+                        )
+
+                    ThisBarrel barrel ->
+                        ( { model
+                            | barrel = turnBarrel barrel (pi / 4)
+                          }
+                        , Cmd.none
+                        )
 
         MoveRight ->
             let
                 _ =
                     Debug.log "MoveRight" 1
             in
-                ( { model
-                    | move = GoRight
-                  }
-                , Cmd.none
-                )
+                case model.active of
+                    ThePlayer ->
+                        ( { model
+                            | move = GoRight
+                          }
+                        , Cmd.none
+                        )
+
+                    ThisBarrel barrel ->
+                        ( { model
+                            | barrel = turnBarrel barrel (-pi / 4)
+                          }
+                        , Cmd.none
+                        )
 
         DontMove ->
             let
@@ -154,6 +172,13 @@ update msg model =
                           }
                         , Cmd.none
                         )
+
+
+turnBarrel : Barrel -> Float -> Barrel
+turnBarrel barrel offsetAngle =
+    { barrel
+        | angle = barrel.angle + offsetAngle
+    }
 
 
 fireFromBarrel : Barrel -> Player -> Player
