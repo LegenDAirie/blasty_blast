@@ -137,21 +137,47 @@ update msg model =
         Fire ->
             case model.active of
                 ThePlayer ->
-                    ( model, Cmd.none )
+                    let
+                        _ =
+                            Debug.log "do nothing" 1
+                    in
+                        ( model, Cmd.none )
 
                 ThisBarrel barrel ->
-                    ( { model
-                        | player = fireFromBarrel barrel model.player
-                      }
-                    , Cmd.none
-                    )
+                    let
+                        _ =
+                            Debug.log "Fire!" 1
+                    in
+                        ( { model
+                            | player = fireFromBarrel barrel model.player
+                            , active = ThePlayer
+                          }
+                        , Cmd.none
+                        )
 
 
 fireFromBarrel : Barrel -> Player -> Player
 fireFromBarrel barrel player =
-    { player
-        | location = ( 100, 100 )
-    }
+    let
+        minDistanceApart =
+            toFloat (barrel.collisionRadius + player.collisionRadius)
+
+        unitVector =
+            ( cos barrel.angle, sin barrel.angle )
+
+        newLocatioin =
+            unitVector
+                |> V2.scale minDistanceApart
+                |> V2.add barrel.location
+
+        newVelocity =
+            unitVector
+                |> V2.scale 10
+    in
+        { player
+            | location = newLocatioin
+            , velocity = newVelocity
+        }
 
 
 calculateActiveElement : Player -> Barrel -> ActiveElement
@@ -196,7 +222,7 @@ updatePlayer : DeltaTime -> ActiveElement -> Player -> Move -> Player
 updatePlayer dt activeElement player moveDirection =
     let
         gravity =
-            V2.scale dt ( 0, -0.001 )
+            V2.scale dt ( 0, -0.01 )
 
         moveForce =
             V2.scale dt <|
