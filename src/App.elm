@@ -58,8 +58,8 @@ type alias DeltaTime =
 initialModel : Model
 initialModel =
     { windowSize = { width = 0, height = 0 }
-    , player = Player ( -100, 100 ) ( 0, 0 ) 35
-    , barrels = [ Barrel ( -100, -100 ) (pi / 4) 35 ]
+    , player = Player ( -300, 100 ) ( 0, 0 ) 35
+    , barrels = [ Barrel ( -300, -100 ) (pi / 4) 35, Barrel ( 300, -100 ) (3 * pi / 4) 35 ]
     , active = ThePlayer
     , move = GoWithTheFlow
     }
