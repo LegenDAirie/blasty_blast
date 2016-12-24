@@ -34,7 +34,7 @@ type alias Barrel =
 type alias Model =
     { windowSize : Window.Size
     , player : Player
-    , barrel : Barrel
+    , barrels : List Barrel
     , active : ActiveElement
     , move : Move
     }
@@ -59,7 +59,7 @@ initialModel : Model
 initialModel =
     { windowSize = { width = 0, height = 0 }
     , player = Player ( -100, 100 ) ( 0, 0 ) 35
-    , barrel = Barrel ( -100, -100 ) (pi / 4) 35
+    , barrels = [ Barrel ( -100, -100 ) (pi / 4) 35 ]
     , active = ThePlayer
     , move = GoWithTheFlow
     }
@@ -96,7 +96,7 @@ update msg model =
         Tick dt ->
             ( { model
                 | player = updatePlayer dt model.active model.player model.move
-                , active = calculateActiveElement model.player model.barrel
+                , active = calculateActiveElement model.player model.barrels
               }
             , Cmd.none
             )
@@ -116,7 +116,7 @@ update msg model =
 
                     ThisBarrel barrel ->
                         ( { model
-                            | barrel = turnBarrel barrel (pi / 4)
+                            | barrels = updateBarrels model.barrels barrel (pi / 4)
                           }
                         , Cmd.none
                         )
@@ -136,7 +136,7 @@ update msg model =
 
                     ThisBarrel barrel ->
                         ( { model
-                            | barrel = turnBarrel barrel (-pi / 4)
+                            | barrels = updateBarrels model.barrels barrel (-pi / 4)
                           }
                         , Cmd.none
                         )
@@ -174,6 +174,19 @@ update msg model =
                         )
 
 
+updateBarrels : List Barrel -> Barrel -> Float -> List Barrel
+updateBarrels barrels barrelToUpdate newAngle =
+    case barrels of
+        barrel :: rest ->
+            if barrel == barrelToUpdate then
+                turnBarrel barrel newAngle :: rest
+            else
+                barrel :: updateBarrels rest barrelToUpdate newAngle
+
+        [] ->
+            []
+
+
 turnBarrel : Barrel -> Float -> Barrel
 turnBarrel barrel offsetAngle =
     { barrel
@@ -205,12 +218,17 @@ fireFromBarrel barrel player =
         }
 
 
-calculateActiveElement : Player -> Barrel -> ActiveElement
-calculateActiveElement player barrel =
-    if hasCollided player barrel then
-        ThisBarrel barrel
-    else
-        ThePlayer
+calculateActiveElement : Player -> List Barrel -> ActiveElement
+calculateActiveElement player barrels =
+    case barrels of
+        barrel :: rest ->
+            if hasCollided player barrel then
+                ThisBarrel barrel
+            else
+                calculateActiveElement player rest
+
+        [] ->
+            ThePlayer
 
 
 hasCollided : Player -> Barrel -> Bool
@@ -337,10 +355,10 @@ view model =
                         canvasWidth
                         canvasHeight
                         [ groupTransform gameTransformation
-                            [ canvasBackground
-                            , drawPlayer model.player
-                            , drawBarrel model.barrel
-                            ]
+                            (canvasBackground
+                                :: (drawPlayer model.player)
+                                :: (List.map drawBarrel model.barrels)
+                            )
                         ]
                 , div [ leftButtonStyle, onMouseDown MoveLeft, onMouseUp DontMove ]
                     []
