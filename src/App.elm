@@ -102,76 +102,56 @@ update msg model =
             )
 
         MoveLeft ->
-            let
-                _ =
-                    Debug.log "MoveLeft" 1
-            in
-                case model.active of
-                    ThePlayer ->
-                        ( { model
-                            | move = GoLeft
-                          }
-                        , Cmd.none
-                        )
+            case model.active of
+                ThePlayer ->
+                    ( { model
+                        | move = GoLeft
+                      }
+                    , Cmd.none
+                    )
 
-                    ThisBarrel barrel ->
-                        ( { model
-                            | barrels = updateBarrels model.barrels barrel (pi / 4)
-                          }
-                        , Cmd.none
-                        )
+                ThisBarrel barrel ->
+                    ( { model
+                        | barrels = updateBarrels model.barrels barrel (pi / 4)
+                      }
+                    , Cmd.none
+                    )
 
         MoveRight ->
-            let
-                _ =
-                    Debug.log "MoveRight" 1
-            in
-                case model.active of
-                    ThePlayer ->
-                        ( { model
-                            | move = GoRight
-                          }
-                        , Cmd.none
-                        )
+            case model.active of
+                ThePlayer ->
+                    ( { model
+                        | move = GoRight
+                      }
+                    , Cmd.none
+                    )
 
-                    ThisBarrel barrel ->
-                        ( { model
-                            | barrels = updateBarrels model.barrels barrel (-pi / 4)
-                          }
-                        , Cmd.none
-                        )
+                ThisBarrel barrel ->
+                    ( { model
+                        | barrels = updateBarrels model.barrels barrel (-pi / 4)
+                      }
+                    , Cmd.none
+                    )
 
         DontMove ->
-            let
-                _ =
-                    Debug.log "DontMove" 1
-            in
-                ( { model
-                    | move = GoWithTheFlow
-                  }
-                , Cmd.none
-                )
+            ( { model
+                | move = GoWithTheFlow
+              }
+            , Cmd.none
+            )
 
         Fire ->
             case model.active of
                 ThePlayer ->
-                    let
-                        _ =
-                            Debug.log "do nothing" 1
-                    in
-                        ( model, Cmd.none )
+                    ( model, Cmd.none )
 
                 ThisBarrel barrel ->
-                    let
-                        _ =
-                            Debug.log "Fire!" 1
-                    in
-                        ( { model
-                            | player = fireFromBarrel barrel model.player
-                            , active = ThePlayer
-                          }
-                        , Cmd.none
-                        )
+                    ( { model
+                        | player = fireFromBarrel barrel model.player
+                        , active = ThePlayer
+                      }
+                    , Cmd.none
+                    )
 
 
 updateBarrels : List Barrel -> Barrel -> Float -> List Barrel
