@@ -11,24 +11,8 @@ import AnimationFrame
 import Window
 import Task
 import Draw exposing (sizeCanvas, canvasBackground, drawPlayer, drawBarrel)
-
-
-type alias Vector =
-    ( Float, Float )
-
-
-type alias Player =
-    { location : Vector
-    , velocity : Vector
-    , collisionRadius : Int
-    }
-
-
-type alias Barrel =
-    { location : Vector
-    , angle : Float
-    , collisionRadius : Int
-    }
+import Player exposing (Player, updatePlayer)
+import GameTypes exposing (Barrel, Vector, DeltaTime, Controles(..), ActiveElement(..))
 
 
 type alias Model =
@@ -36,23 +20,8 @@ type alias Model =
     , player : Player
     , barrels : List Barrel
     , active : ActiveElement
-    , move : Move
+    , move : Controles
     }
-
-
-type ActiveElement
-    = ThePlayer
-    | ThisBarrel Barrel
-
-
-type Move
-    = GoLeft
-    | GoRight
-    | GoWithTheFlow
-
-
-type alias DeltaTime =
-    Float
 
 
 initialModel : Model
@@ -239,45 +208,6 @@ capVerticalVelocity maxSpeed ( x, y ) =
         ( x, -maxSpeed )
     else
         ( x, y )
-
-
-updatePlayer : DeltaTime -> ActiveElement -> Player -> Move -> Player
-updatePlayer dt activeElement player moveDirection =
-    let
-        gravity =
-            V2.scale dt ( 0, -0.01 )
-
-        moveForce =
-            V2.scale dt <|
-                case moveDirection of
-                    GoLeft ->
-                        ( -0.01, 0 )
-
-                    GoRight ->
-                        ( 0.01, 0 )
-
-                    GoWithTheFlow ->
-                        ( 0, 0 )
-
-        newVelocity =
-            player.velocity
-                |> V2.add gravity
-                |> V2.add moveForce
-                |> capHorizontalVelocity 10
-                |> capVerticalVelocity 10
-    in
-        case activeElement of
-            ThePlayer ->
-                { player
-                    | location = V2.add player.location newVelocity
-                    , velocity = newVelocity
-                }
-
-            ThisBarrel barrel ->
-                { player
-                    | location = barrel.location
-                    , velocity = ( 0, 0 )
-                }
 
 
 view : Model -> Html Msg
