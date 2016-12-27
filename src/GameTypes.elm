@@ -2,7 +2,6 @@ module GameTypes
     exposing
         ( Barrel
         , Vector
-        , DeltaTime
         , Controles(..)
         , ActiveElement(..)
         )
@@ -17,10 +16,6 @@ type Controles
 type ActiveElement
     = ThePlayer
     | ThisBarrel Barrel
-
-
-type alias DeltaTime =
-    Float
 
 
 type alias Vector =

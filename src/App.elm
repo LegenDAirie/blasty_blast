@@ -12,7 +12,8 @@ import Window
 import Task
 import Draw exposing (sizeCanvas, canvasBackground, drawPlayer, drawBarrel)
 import Player exposing (Player, updatePlayer)
-import GameTypes exposing (Barrel, Vector, DeltaTime, Controles(..), ActiveElement(..))
+import Barrel exposing (updateBarrel)
+import GameTypes exposing (Barrel, Vector, Controles(..), ActiveElement(..))
 
 
 type alias Model =
@@ -22,6 +23,10 @@ type alias Model =
     , active : ActiveElement
     , move : Controles
     }
+
+
+type alias DeltaTime =
+    Float
 
 
 initialModel : Model
@@ -80,11 +85,15 @@ update msg model =
                     )
 
                 ThisBarrel barrel ->
-                    ( { model
-                        | barrels = updateBarrels model.barrels barrel (pi / 4)
-                      }
-                    , Cmd.none
-                    )
+                    let
+                        transformBarrel =
+                            Barrel.rotate (pi / 4)
+                    in
+                        ( { model
+                            | barrels = updateBarrel transformBarrel model.barrels barrel
+                          }
+                        , Cmd.none
+                        )
 
         MoveRight ->
             case model.active of
@@ -96,11 +105,15 @@ update msg model =
                     )
 
                 ThisBarrel barrel ->
-                    ( { model
-                        | barrels = updateBarrels model.barrels barrel (-pi / 4)
-                      }
-                    , Cmd.none
-                    )
+                    let
+                        fn =
+                            Barrel.rotate (-pi / 4)
+                    in
+                        ( { model
+                            | barrels = updateBarrel fn model.barrels barrel
+                          }
+                        , Cmd.none
+                        )
 
         DontMove ->
             ( { model
@@ -123,42 +136,22 @@ update msg model =
                     )
 
 
-updateBarrels : List Barrel -> Barrel -> Float -> List Barrel
-updateBarrels barrels barrelToUpdate newAngle =
-    case barrels of
-        barrel :: rest ->
-            if barrel == barrelToUpdate then
-                turnBarrel barrel newAngle :: rest
-            else
-                barrel :: updateBarrels rest barrelToUpdate newAngle
-
-        [] ->
-            []
-
-
-turnBarrel : Barrel -> Float -> Barrel
-turnBarrel barrel offsetAngle =
-    { barrel
-        | angle = barrel.angle + offsetAngle
-    }
-
-
 fireFromBarrel : Barrel -> Player -> Player
 fireFromBarrel barrel player =
     let
         minDistanceApart =
             toFloat (barrel.collisionRadius + player.collisionRadius)
 
-        unitVector =
+        directionVector =
             ( cos barrel.angle, sin barrel.angle )
 
         newLocatioin =
-            unitVector
+            directionVector
                 |> V2.scale minDistanceApart
                 |> V2.add barrel.location
 
         newVelocity =
-            unitVector
+            directionVector
                 |> V2.scale 10
     in
         { player
@@ -190,24 +183,6 @@ hasCollided player barrel =
             player.collisionRadius + barrel.collisionRadius
     in
         distanceBetween < toFloat collectiveRadius
-
-
-capHorizontalVelocity : Float -> Vector -> Vector
-capHorizontalVelocity maxSpeed ( x, y ) =
-    if x > maxSpeed then
-        ( maxSpeed, y )
-    else if x < -maxSpeed then
-        ( -maxSpeed, y )
-    else
-        ( x, y )
-
-
-capVerticalVelocity : Float -> Vector -> Vector
-capVerticalVelocity maxSpeed ( x, y ) =
-    if y < -maxSpeed then
-        ( x, -maxSpeed )
-    else
-        ( x, y )
 
 
 view : Model -> Html Msg

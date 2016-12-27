@@ -1,11 +1,15 @@
 module Player exposing (Player, updatePlayer)
 
 import Vector2 as V2
-import GameTypes exposing (DeltaTime, Controles(..), ActiveElement(..))
+import GameTypes exposing (Controles(..), ActiveElement(..))
 
 
 type alias Vector =
     ( Float, Float )
+
+
+type alias DeltaTime =
+    Float
 
 
 type alias Player =
