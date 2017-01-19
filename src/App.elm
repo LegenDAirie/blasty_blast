@@ -3,6 +3,9 @@ module App exposing (..)
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
 import Vector2 as V2 exposing (distance, normalize, setX)
+import Game.TwoD.Render as Render exposing (Renderable)
+import Game.TwoD as Game
+import Game.TwoD.Camera as Camera exposing (Camera)
 import AnimationFrame
 import Window
 import Task
@@ -17,6 +20,7 @@ type alias Model =
     , barrels : List Barrel
     , active : ActiveElement
     , move : Controles
+    , camera : Camera
     }
 
 
@@ -31,6 +35,7 @@ initialModel =
     , barrels = [ Barrel ( -300, -100 ) (pi / 4) 35, Barrel ( 300, -100 ) (3 * pi / 4) 35 ]
     , active = ThePlayer
     , move = GoWithTheFlow
+    , camera = Camera.fixedWidth 8 ( 0, 0 )
     }
 
 
@@ -66,6 +71,7 @@ update msg model =
             ( { model
                 | player = updatePlayer dt model.active model.player model.move
                 , active = calculateActiveElement model.player model.barrels
+                , camera = Camera.follow 1.5 dt model.player.location model.camera
               }
             , Cmd.none
             )
@@ -200,7 +206,18 @@ view model =
                 [ ( "display", "flex" ) ]
     in
         div []
-            []
+            [ Game.renderCentered
+                { time = 0
+                , size = sizeCanvas model.windowSize
+                , camera = model.camera
+                }
+                (render model)
+            ]
+
+
+render : Model -> List Renderable
+render model =
+    []
 
 
 sizeCanvas : Window.Size -> ( Int, Int )
