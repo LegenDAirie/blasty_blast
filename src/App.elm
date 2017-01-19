@@ -2,7 +2,6 @@ module App exposing (..)
 
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
-import Html.Events exposing (onClick, onMouseDown, onMouseUp)
 import Collage exposing (collage, groupTransform)
 import Transform exposing (identity, rotation, translation)
 import Element exposing (toHtml)
@@ -203,55 +202,21 @@ view model =
         gameTransformation =
             Transform.scale gameScale
 
-        fireButtonStyle =
-            style
-                [ ( "position", "absolute" )
-                , ( "left", toString leftRightButtonWidth ++ "px" )
-                , ( "width", toString fireButtonWidth ++ "px" )
-                , ( "height", toString canvasHeight ++ "px" )
-                , ( "border", "1px solid red" )
-                ]
-
-        leftButtonStyle =
-            style
-                [ ( "position", "absolute" )
-                , ( "width", toString leftRightButtonWidth ++ "px" )
-                , ( "height", toString canvasHeight ++ "px" )
-                , ( "border", "1px solid red" )
-                ]
-
-        rightButtonStyle =
-            style
-                [ ( "position", "absolute" )
-                , ( "left", toString (leftRightButtonWidth + fireButtonWidth) ++ "px" )
-                , ( "width", toString leftRightButtonWidth ++ "px" )
-                , ( "height", toString canvasHeight ++ "px" )
-                , ( "border", "1px solid red" )
-                ]
-
         canvasContainer =
             style
                 [ ( "display", "flex" ) ]
     in
         div []
-            [ div [ canvasContainer ]
-                [ toHtml <|
-                    collage
-                        canvasWidth
-                        canvasHeight
-                        [ groupTransform gameTransformation
-                            (canvasBackground
-                                :: (drawPlayer model.player)
-                                :: (List.map drawBarrel model.barrels)
-                            )
-                        ]
-                , div [ leftButtonStyle, onMouseDown MoveLeft, onMouseUp DontMove ]
-                    []
-                , div [ fireButtonStyle, onMouseDown Fire ]
-                    []
-                , div [ rightButtonStyle, onMouseDown MoveRight, onMouseUp DontMove ]
-                    []
-                ]
+            [ toHtml <|
+                collage
+                    canvasWidth
+                    canvasHeight
+                    [ groupTransform gameTransformation
+                        (canvasBackground
+                            :: (drawPlayer model.player)
+                            :: (List.map drawBarrel model.barrels)
+                        )
+                    ]
             ]
 
 
