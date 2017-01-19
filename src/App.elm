@@ -2,14 +2,10 @@ module App exposing (..)
 
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
-import Collage exposing (collage, groupTransform)
-import Transform exposing (identity, rotation, translation)
-import Element exposing (toHtml)
 import Vector2 as V2 exposing (distance, normalize, setX)
 import AnimationFrame
 import Window
 import Task
-import Draw exposing (sizeCanvas, canvasBackground, drawPlayer, drawBarrel)
 import Player exposing (Player, updatePlayer)
 import Barrel exposing (updateBarrel)
 import GameTypes exposing (Barrel, Vector, Controles(..), ActiveElement(..))
@@ -199,25 +195,26 @@ view model =
         gameScale =
             toFloat canvasHeight / 720
 
-        gameTransformation =
-            Transform.scale gameScale
-
         canvasContainer =
             style
                 [ ( "display", "flex" ) ]
     in
         div []
-            [ toHtml <|
-                collage
-                    canvasWidth
-                    canvasHeight
-                    [ groupTransform gameTransformation
-                        (canvasBackground
-                            :: (drawPlayer model.player)
-                            :: (List.map drawBarrel model.barrels)
-                        )
-                    ]
-            ]
+            []
+
+
+sizeCanvas : Window.Size -> ( Int, Int )
+sizeCanvas size =
+    let
+        width =
+            min size.width <|
+                floor (16 / 9 * toFloat size.height)
+
+        height =
+            min size.height <|
+                floor (9 / 16 * toFloat size.width)
+    in
+        ( width, height )
 
 
 subscriptions : Model -> Sub Msg
