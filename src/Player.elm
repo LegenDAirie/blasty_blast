@@ -23,16 +23,16 @@ updatePlayer : DeltaTime -> ActiveElement -> Player -> Controles -> Player
 updatePlayer dt activeElement player moveDirection =
     let
         gravity =
-            V2.scale dt ( 0, -0.01 )
+            V2.scale dt ( 0, -1 )
 
         moveForce =
             V2.scale dt <|
                 case moveDirection of
                     GoLeft ->
-                        ( -0.01, 0 )
+                        ( -1, 0 )
 
                     GoRight ->
-                        ( 0.01, 0 )
+                        ( 1, 0 )
 
                     GoWithTheFlow ->
                         ( 0, 0 )

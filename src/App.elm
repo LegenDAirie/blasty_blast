@@ -247,6 +247,6 @@ sizeCanvas size =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ AnimationFrame.diffs Tick
+        [ AnimationFrame.diffs <| Tick << (\dt -> dt / 1000)
         , Window.resizes (\size -> SetCanvasSize size)
         ]
