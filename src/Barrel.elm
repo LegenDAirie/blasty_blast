@@ -1,4 +1,4 @@
-module Barrel exposing (updateBarrel, rotate)
+module Barrel exposing (updateBarrel, rotate, Barrel)
 
 
 type alias Vector =

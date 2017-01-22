@@ -12,6 +12,8 @@ import Task
 import Player exposing (Player, updatePlayer)
 import Barrel exposing (updateBarrel)
 import GameTypes exposing (Barrel, Vector, Controles(..), ActiveElement(..))
+import Draw exposing (renderPlayer, renderBarrel)
+import Color
 
 
 type alias Model =
@@ -35,7 +37,7 @@ initialModel =
     , barrels = [ Barrel ( -300, -100 ) (pi / 4) 35, Barrel ( 300, -100 ) (3 * pi / 4) 35 ]
     , active = ThePlayer
     , move = GoWithTheFlow
-    , camera = Camera.fixedWidth 8 ( 0, 0 )
+    , camera = Camera.fixedWidth 1280 ( 0, 0 )
     }
 
 
@@ -68,13 +70,18 @@ update msg model =
             )
 
         Tick dt ->
-            ( { model
-                | player = updatePlayer dt model.active model.player model.move
-                , active = calculateActiveElement model.player model.barrels
-                , camera = Camera.follow 1.5 dt model.player.location model.camera
-              }
-            , Cmd.none
-            )
+            let
+                _ =
+                    Debug.log "dt" dt
+            in
+                ( { model
+                    | player = updatePlayer dt model.active model.player model.move
+                    , active = calculateActiveElement model.player model.barrels
+                    , camera =
+                        Camera.follow 0.5 0.17 model.player.location model.camera
+                  }
+                , Cmd.none
+                )
 
         MoveLeft ->
             case model.active of
@@ -217,7 +224,10 @@ view model =
 
 render : Model -> List Renderable
 render model =
-    []
+    List.concat
+        [ [ renderPlayer model.player ]
+        , (List.map renderBarrel model.barrels)
+        ]
 
 
 sizeCanvas : Window.Size -> ( Int, Int )
