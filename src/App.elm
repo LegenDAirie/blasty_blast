@@ -45,7 +45,7 @@ initialModel =
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, Task.perform (\size -> SetCanvasSize size) Window.size )
+    ( initialModel, Task.perform SetCanvasSize Window.size )
 
 
 type Msg
@@ -143,13 +143,13 @@ update msg model =
                     )
 
         SingleTouchMsg touchEvent ->
-            let
-                _ =
-                    Debug.log "touch event" touchEvent
-            in
-                ( model
-                , Cmd.none
-                )
+            -- let
+            --     _ =
+            --         Debug.log "touch event" touchEvent
+            -- in
+            ( model
+            , Cmd.none
+            )
 
 
 fireFromBarrel : Barrel -> Player -> Player
