@@ -6,6 +6,8 @@ import Vector2 as V2 exposing (distance, normalize, setX)
 import Game.TwoD.Render as Render exposing (Renderable)
 import Game.TwoD as Game
 import Game.TwoD.Camera as Camera exposing (Camera)
+import Touch exposing (TouchEvent(..), Touch)
+import SingleTouch exposing (SingleTouch, onSingleTouch)
 import AnimationFrame
 import Window
 import Task
@@ -54,6 +56,7 @@ type Msg
     | MoveRight
     | DontMove
     | Fire
+    | SingleTouchMsg SingleTouch
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -70,18 +73,14 @@ update msg model =
             )
 
         Tick dt ->
-            let
-                _ =
-                    Debug.log "dt" dt
-            in
-                ( { model
-                    | player = updatePlayer dt model.active model.player model.move
-                    , active = calculateActiveElement model.player model.barrels
-                    , camera =
-                        Camera.follow 0.5 0.17 model.player.location model.camera
-                  }
-                , Cmd.none
-                )
+            ( { model
+                | player = updatePlayer dt model.active model.player model.move
+                , active = calculateActiveElement model.player model.barrels
+                , camera =
+                    Camera.follow 0.5 0.17 model.player.location model.camera
+              }
+            , Cmd.none
+            )
 
         MoveLeft ->
             case model.active of
@@ -142,6 +141,15 @@ update msg model =
                       }
                     , Cmd.none
                     )
+
+        SingleTouchMsg touchEvent ->
+            let
+                _ =
+                    Debug.log "touch event" touchEvent
+            in
+                ( model
+                , Cmd.none
+                )
 
 
 fireFromBarrel : Barrel -> Player -> Player
@@ -213,7 +221,11 @@ view model =
                 [ ( "display", "flex" ) ]
     in
         div []
-            [ Game.renderCentered
+            [ Game.renderCenteredWithOptions
+                []
+                (onAllTouch
+                    ++ [ style [ ( "border", "solid 1px black" ) ] ]
+                )
                 { time = 0
                 , size = sizeCanvas model.windowSize
                 , camera = model.camera
@@ -242,6 +254,15 @@ sizeCanvas size =
                 floor (9 / 16 * toFloat size.width)
     in
         ( width, height )
+
+
+onAllTouch : List (Html.Attribute Msg)
+onAllTouch =
+    [ onSingleTouch TouchStart Touch.preventAndStop <| SingleTouchMsg
+    , onSingleTouch TouchMove Touch.preventAndStop <| SingleTouchMsg
+    , onSingleTouch TouchEnd Touch.preventAndStop <| SingleTouchMsg
+    , onSingleTouch TouchCancel Touch.preventAndStop <| SingleTouchMsg
+    ]
 
 
 subscriptions : Model -> Sub Msg
