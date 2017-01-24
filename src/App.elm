@@ -2,10 +2,10 @@ module App exposing (..)
 
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
-import Vector2 as V2 exposing (distance, normalize, setX)
+import Vector2 as V2 exposing (distance, normalize, setX, getX, getY)
 import Game.TwoD.Render as Render exposing (Renderable)
 import Game.TwoD as Game
-import Game.TwoD.Camera as Camera exposing (Camera)
+import Game.TwoD.Camera as Camera exposing (Camera, getViewSize, getPosition)
 import Touch exposing (TouchEvent(..), Touch)
 import SingleTouch exposing (SingleTouch, onSingleTouch)
 import AnimationFrame
@@ -14,7 +14,7 @@ import Task
 import Player exposing (Player, updatePlayer)
 import Barrel exposing (updateBarrel)
 import GameTypes exposing (Barrel, Vector, Controles(..), ActiveElement(..))
-import Draw exposing (renderPlayer, renderBarrel)
+import Draw exposing (renderPlayer, renderBarrel, renderTouch)
 import Color
 
 
@@ -25,6 +25,7 @@ type alias Model =
     , active : ActiveElement
     , move : Controles
     , camera : Camera
+    , touchLocation : Vector
     }
 
 
@@ -40,6 +41,7 @@ initialModel =
     , active = ThePlayer
     , move = GoWithTheFlow
     , camera = Camera.fixedWidth 1280 ( 0, 0 )
+    , touchLocation = ( 0, 0 )
     }
 
 
@@ -76,8 +78,7 @@ update msg model =
             ( { model
                 | player = updatePlayer dt model.active model.player model.move
                 , active = calculateActiveElement model.player model.barrels
-                , camera =
-                    Camera.follow 0.5 0.17 model.player.location model.camera
+                , camera = Camera.follow 0.5 0.17 model.player.location model.camera
               }
             , Cmd.none
             )
@@ -143,13 +144,59 @@ update msg model =
                     )
 
         SingleTouchMsg touchEvent ->
-            -- let
-            --     _ =
-            --         Debug.log "touch event" touchEvent
-            -- in
-            ( model
-            , Cmd.none
-            )
+            let
+                { clientX, clientY } =
+                    touchEvent.touch
+
+                ( canvasWidth, canvasHeight ) =
+                    sizeCanvas model.windowSize
+
+                gameSize =
+                    getViewSize (sizeCanvas model.windowSize) model.camera
+
+                sizeRatio =
+                    getX gameSize / canvasWidth
+
+                newTouchLocation =
+                    convertTouchCoorToGameCoor ( clientX, clientY ) gameSize sizeRatio model.camera
+            in
+                ( { model | touchLocation = newTouchLocation }
+                , Cmd.none
+                )
+
+
+convertTouchCoorToGameCoor : Vector -> Vector -> Float -> Camera -> Vector
+convertTouchCoorToGameCoor touchLocation gameSize sizeRatio camera =
+    touchLocation
+        |> convertToGameUnits sizeRatio
+        |> offSetOrigin gameSize
+        |> offSetByCamera camera
+        |> flipY
+
+
+flipY : Vector -> Vector
+flipY ( x, y ) =
+    ( x, -y )
+
+
+convertToGameUnits : Float -> Vector -> Vector
+convertToGameUnits sizeRatio touchLocation =
+    V2.scale sizeRatio touchLocation
+
+
+offSetOrigin : Vector -> Vector -> Vector
+offSetOrigin gameSize touchLocation =
+    gameSize
+        |> V2.scale 0.5
+        |> V2.sub touchLocation
+
+
+offSetByCamera : Camera -> Vector -> Vector
+offSetByCamera camera touchLocation =
+    camera
+        |> getPosition
+        |> flipY
+        |> V2.add touchLocation
 
 
 fireFromBarrel : Barrel -> Player -> Player
@@ -207,18 +254,10 @@ view model =
         ( canvasWidth, canvasHeight ) =
             sizeCanvas model.windowSize
 
-        fireButtonWidth =
-            toFloat canvasWidth * 0.7
-
-        leftRightButtonWidth =
-            toFloat canvasWidth * 0.15
-
-        gameScale =
-            toFloat canvasHeight / 720
-
-        canvasContainer =
-            style
-                [ ( "display", "flex" ) ]
+        -- ( gameWidth, gameHeight ) =
+        --     getViewSize ( canvasWidth, canvasHeight ) model.camera
+        -- ( touchX, touchY ) =
+        --     ( getX model.touchLocation, getY model.touchLocation )
     in
         div []
             [ Game.renderCenteredWithOptions
@@ -227,10 +266,12 @@ view model =
                     ++ [ style [ ( "border", "solid 1px black" ) ] ]
                 )
                 { time = 0
-                , size = sizeCanvas model.windowSize
+                , size = ( floor canvasWidth, floor canvasHeight )
                 , camera = model.camera
                 }
                 (render model)
+              -- test touch
+              -- , div [ style [ ( "width", "50px" ), ( "height", "50px" ), ( "border", "solid 1px black" ), ( "position", "absolute" ), ( "top", "0" ), ( "left", "0" ) ] ] [ Html.text <| toString ( touchX, touchY ) ]
             ]
 
 
@@ -239,10 +280,11 @@ render model =
     List.concat
         [ [ renderPlayer model.player ]
         , (List.map renderBarrel model.barrels)
+        , [ renderTouch model.touchLocation model.camera ]
         ]
 
 
-sizeCanvas : Window.Size -> ( Int, Int )
+sizeCanvas : Window.Size -> ( Float, Float )
 sizeCanvas size =
     let
         width =
@@ -253,7 +295,7 @@ sizeCanvas size =
             min size.height <|
                 floor (9 / 16 * toFloat size.width)
     in
-        ( width, height )
+        ( toFloat width, toFloat height )
 
 
 onAllTouch : List (Html.Attribute Msg)
