@@ -65,83 +65,75 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         NoOp ->
-            ( model, Cmd.none )
+            model ! []
 
         SetCanvasSize size ->
-            ( { model
+            { model
                 | windowSize = size
-              }
-            , Cmd.none
-            )
+            }
+                ! []
 
         Tick dt ->
-            ( { model
+            { model
                 | player = updatePlayer dt model.active model.player model.move
                 , active = calculateActiveElement model.player model.barrels
                 , camera = Camera.follow 0.5 0.17 model.player.location model.camera
-              }
-            , Cmd.none
-            )
+            }
+                ! []
 
         MoveLeft ->
             case model.active of
                 ThePlayer ->
-                    ( { model
+                    { model
                         | move = GoLeft
-                      }
-                    , Cmd.none
-                    )
+                    }
+                        ! []
 
                 ThisBarrel barrel ->
                     let
                         transformBarrel =
                             Barrel.rotate (pi / 4)
                     in
-                        ( { model
+                        { model
                             | barrels = updateBarrel transformBarrel model.barrels barrel
-                          }
-                        , Cmd.none
-                        )
+                        }
+                            ! []
 
         MoveRight ->
             case model.active of
                 ThePlayer ->
-                    ( { model
+                    { model
                         | move = GoRight
-                      }
-                    , Cmd.none
-                    )
+                    }
+                        ! []
 
                 ThisBarrel barrel ->
                     let
                         fn =
                             Barrel.rotate (-pi / 4)
                     in
-                        ( { model
+                        { model
                             | barrels = updateBarrel fn model.barrels barrel
-                          }
-                        , Cmd.none
-                        )
+                        }
+                            ! []
 
         DontMove ->
-            ( { model
+            { model
                 | move = GoWithTheFlow
-              }
-            , Cmd.none
-            )
+            }
+                ! []
 
         Fire ->
             case model.active of
                 ThePlayer ->
-                    ( model, Cmd.none )
+                    model ! []
 
                 ThisBarrel barrel ->
-                    ( { model
+                    { model
                         | player = fireFromBarrel barrel model.player
                         , active = ThePlayer
-                      }
-                    , Cmd.none
-                    )
+                    }
+                        ! []
 
         SingleTouchMsg touchEvent ->
             let
@@ -160,9 +152,8 @@ update msg model =
                 newTouchLocation =
                     convertTouchCoorToGameCoor gameSize sizeRatio model.camera ( clientX, clientY )
             in
-                ( { model | touchLocation = newTouchLocation }
-                , Cmd.none
-                )
+                { model | touchLocation = newTouchLocation }
+                    ! []
 
 
 convertTouchCoorToGameCoor : Vector -> Float -> Camera -> Vector -> Vector
