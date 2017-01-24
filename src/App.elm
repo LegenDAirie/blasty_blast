@@ -158,15 +158,15 @@ update msg model =
                     getX gameSize / canvasWidth
 
                 newTouchLocation =
-                    convertTouchCoorToGameCoor ( clientX, clientY ) gameSize sizeRatio model.camera
+                    convertTouchCoorToGameCoor gameSize sizeRatio model.camera ( clientX, clientY )
             in
                 ( { model | touchLocation = newTouchLocation }
                 , Cmd.none
                 )
 
 
-convertTouchCoorToGameCoor : Vector -> Vector -> Float -> Camera -> Vector
-convertTouchCoorToGameCoor touchLocation gameSize sizeRatio camera =
+convertTouchCoorToGameCoor : Vector -> Float -> Camera -> Vector -> Vector
+convertTouchCoorToGameCoor gameSize sizeRatio camera touchLocation =
     touchLocation
         |> convertToGameUnits sizeRatio
         |> offSetOrigin gameSize
@@ -254,6 +254,7 @@ view model =
         ( canvasWidth, canvasHeight ) =
             sizeCanvas model.windowSize
 
+        -- test touch
         -- ( gameWidth, gameHeight ) =
         --     getViewSize ( canvasWidth, canvasHeight ) model.camera
         -- ( touchX, touchY ) =
