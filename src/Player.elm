@@ -1,7 +1,7 @@
-module Player exposing (Player, updatePlayer)
+module Player exposing (updatePlayer)
 
 import Vector2 as V2
-import GameTypes exposing (Force(..), ActiveElement(..))
+import GameTypes exposing (Force(..), ActiveElement(..), Player)
 
 
 type alias Vector =
@@ -10,13 +10,6 @@ type alias Vector =
 
 type alias DeltaTime =
     Float
-
-
-type alias Player =
-    { location : Vector
-    , velocity : Vector
-    , collisionRadius : Int
-    }
 
 
 updatePlayer : DeltaTime -> ActiveElement -> Player -> Force -> Player

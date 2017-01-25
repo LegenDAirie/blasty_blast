@@ -2,10 +2,9 @@ module Draw exposing (renderPlayer, renderBarrel, renderTouch)
 
 import Game.TwoD.Render as Render exposing (Renderable)
 import Game.TwoD.Camera as Camera exposing (Camera, getPosition, getViewSize)
+import GameTypes exposing (Player, Barrel)
 import Vector2 as V2 exposing (getX, getY)
 import Color
-import Player exposing (Player)
-import Barrel exposing (Barrel)
 
 
 renderPlayer : Player -> Renderable

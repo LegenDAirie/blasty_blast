@@ -12,11 +12,12 @@ import AnimationFrame
 import Window
 import Task
 import Color
-import Player exposing (Player, updatePlayer)
+import Player exposing (updatePlayer)
 import Barrel exposing (updateBarrel)
-import GameTypes exposing (Barrel, Vector, Force(..), Controles(..), ActiveElement(..))
+import GameTypes exposing (Barrel, Player, Vector, Force(..), Controles(..), ActiveElement(..))
 import Draw exposing (renderPlayer, renderBarrel, renderTouch)
 import Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits)
+import Forces exposing (moveLeft, moveRight, dontMove)
 
 
 type alias Model =
@@ -37,15 +38,19 @@ type alias DeltaTime =
 
 initialModel : Model
 initialModel =
-    { windowSize = { width = 0, height = 0 }
-    , player = Player ( -300, 100 ) ( 0, 0 ) 35
-    , barrels = [ Barrel ( -300, -100 ) (pi / 4) 35, Barrel ( 300, -100 ) (3 * pi / 4) 35 ]
-    , active = ThePlayer
-    , force = GoWithTheFlow
-    , camera = Camera.fixedWidth 1280 ( -300, 100 )
-    , touchLocation = ( 0, 0 )
-    , debug = ""
-    }
+    let
+        startingPoint =
+            ( -300, 100 )
+    in
+        { windowSize = { width = 0, height = 0 }
+        , player = Player startingPoint ( 0, 0 ) 35
+        , barrels = [ Barrel ( -300, -100 ) (pi / 4) 35, Barrel ( 300, -100 ) (3 * pi / 4) 35 ]
+        , active = ThePlayer
+        , force = GoWithTheFlow
+        , camera = Camera.fixedWidth 1280 startingPoint
+        , touchLocation = ( 0, 0 )
+        , debug = ""
+        }
 
 
 init : ( Model, Cmd Msg )
@@ -152,49 +157,6 @@ fire model =
                 | player = fireFromBarrel barrel model.player
                 , active = ThePlayer
             }
-
-
-moveLeft : Model -> Model
-moveLeft model =
-    case model.active of
-        ThePlayer ->
-            { model
-                | force = GoLeft
-            }
-
-        ThisBarrel barrel ->
-            let
-                transformBarrel =
-                    Barrel.rotate (pi / 4)
-            in
-                { model
-                    | barrels = updateBarrel transformBarrel model.barrels barrel
-                }
-
-
-moveRight : Model -> Model
-moveRight model =
-    case model.active of
-        ThePlayer ->
-            { model
-                | force = GoRight
-            }
-
-        ThisBarrel barrel ->
-            let
-                transformBarrel =
-                    Barrel.rotate (-pi / 4)
-            in
-                { model
-                    | barrels = updateBarrel transformBarrel model.barrels barrel
-                }
-
-
-dontMove : Model -> Model
-dontMove model =
-    { model
-        | force = GoWithTheFlow
-    }
 
 
 fireFromBarrel : Barrel -> Player -> Player
