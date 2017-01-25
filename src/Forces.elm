@@ -1,7 +1,27 @@
-module Forces exposing (moveLeft, moveRight, dontMove)
+module Forces exposing (moveLeft, moveRight, dontMove, gravity, controllerLeftForce, controllerRightForce, blastForce)
 
-import GameTypes exposing (ActiveElement(..), Controles(..), Force(..), Barrel, Model)
+import GameTypes exposing (ActiveElement(..), Controles(..), Force(..), Barrel, Model, Vector)
 import Barrel exposing (updateBarrel)
+
+
+gravity : Vector
+gravity =
+    ( 0, -50 )
+
+
+blastForce : Float
+blastForce =
+    20
+
+
+controllerLeftForce : Vector
+controllerLeftForce =
+    ( -20, 0 )
+
+
+controllerRightForce : Vector
+controllerRightForce =
+    ( 20, 0 )
 
 
 moveLeft : Model -> Model

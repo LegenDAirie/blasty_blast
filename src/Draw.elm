@@ -12,7 +12,7 @@ renderPlayer player =
     Render.rectangle
         { color = Color.charcoal
         , position = player.location
-        , size = ( toFloat player.collisionRadius, toFloat player.collisionRadius )
+        , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
         }
 
 
@@ -22,7 +22,7 @@ renderBarrel barrel =
         { color = Color.brown
         , position = ( getX barrel.location, getY barrel.location, 0 )
         , rotation = barrel.angle
-        , size = ( toFloat barrel.collisionRadius, toFloat barrel.collisionRadius )
+        , size = ( toFloat barrel.collisionRadius * 2, toFloat barrel.collisionRadius * 2 )
         , pivot = ( 0.5, 0.5 )
         }
 

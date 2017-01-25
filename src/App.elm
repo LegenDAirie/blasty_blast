@@ -12,7 +12,7 @@ import AnimationFrame
 import Window
 import Task
 import Color
-import Player exposing (updatePlayer)
+import Player exposing (updatePlayer, fireFromBarrel)
 import Barrel exposing (updateBarrel)
 import GameTypes exposing (Barrel, Player, Vector, Force(..), Controles(..), ActiveElement(..))
 import Draw exposing (renderPlayer, renderBarrel, renderTouch)
@@ -43,8 +43,8 @@ initialModel =
             ( -300, 100 )
     in
         { windowSize = { width = 0, height = 0 }
-        , player = Player startingPoint ( 0, 0 ) 35
-        , barrels = [ Barrel ( -300, -100 ) (pi / 4) 35, Barrel ( 300, -100 ) (3 * pi / 4) 35 ]
+        , player = Player startingPoint ( 0, 0 ) 60
+        , barrels = [ Barrel ( -300, -100 ) (pi / 4) 60, Barrel ( 300, -100 ) (3 * pi / 4) 60 ]
         , active = ThePlayer
         , force = GoWithTheFlow
         , camera = Camera.fixedWidth 1280 startingPoint
@@ -157,30 +157,6 @@ fire model =
                 | player = fireFromBarrel barrel model.player
                 , active = ThePlayer
             }
-
-
-fireFromBarrel : Barrel -> Player -> Player
-fireFromBarrel barrel player =
-    let
-        minDistanceApart =
-            toFloat (barrel.collisionRadius + player.collisionRadius)
-
-        directionVector =
-            ( cos barrel.angle, sin barrel.angle )
-
-        newLocatioin =
-            directionVector
-                |> V2.scale minDistanceApart
-                |> V2.add barrel.location
-
-        newVelocity =
-            directionVector
-                |> V2.scale 10
-    in
-        { player
-            | location = newLocatioin
-            , velocity = newVelocity
-        }
 
 
 calculateActiveElement : Player -> List Barrel -> ActiveElement

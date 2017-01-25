@@ -1,7 +1,8 @@
-module Player exposing (updatePlayer)
+module Player exposing (updatePlayer, fireFromBarrel)
 
 import Vector2 as V2
-import GameTypes exposing (Force(..), ActiveElement(..), Player)
+import GameTypes exposing (Force(..), ActiveElement(..), Player, Barrel)
+import Forces exposing (gravity, controllerLeftForce, controllerRightForce, blastForce)
 
 
 type alias Vector =
@@ -15,27 +16,27 @@ type alias DeltaTime =
 updatePlayer : DeltaTime -> ActiveElement -> Player -> Force -> Player
 updatePlayer dt activeElement player moveDirection =
     let
-        gravity =
-            V2.scale dt ( 0, -1 )
+        gravitationalForce =
+            V2.scale dt gravity
 
-        moveForce =
+        currentControllerForce =
             V2.scale dt <|
                 case moveDirection of
                     GoLeft ->
-                        ( -1, 0 )
+                        controllerLeftForce
 
                     GoRight ->
-                        ( 1, 0 )
+                        controllerRightForce
 
                     GoWithTheFlow ->
                         ( 0, 0 )
 
         newVelocity =
             player.velocity
-                |> V2.add gravity
-                |> V2.add moveForce
-                |> capHorizontalVelocity 10
-                |> capVerticalVelocity 10
+                |> V2.add gravitationalForce
+                |> V2.add currentControllerForce
+                |> capHorizontalVelocity 100
+                |> capVerticalVelocity 100
     in
         case activeElement of
             ThePlayer ->
@@ -49,6 +50,30 @@ updatePlayer dt activeElement player moveDirection =
                     | location = barrel.location
                     , velocity = ( 0, 0 )
                 }
+
+
+fireFromBarrel : Barrel -> Player -> Player
+fireFromBarrel barrel player =
+    let
+        minDistanceApart =
+            toFloat (barrel.collisionRadius + player.collisionRadius)
+
+        directionVector =
+            ( cos barrel.angle, sin barrel.angle )
+
+        newLocatioin =
+            directionVector
+                |> V2.scale minDistanceApart
+                |> V2.add barrel.location
+
+        newVelocity =
+            directionVector
+                |> V2.scale blastForce
+    in
+        { player
+            | location = newLocatioin
+            , velocity = newVelocity
+        }
 
 
 capHorizontalVelocity : Float -> Vector -> Vector
