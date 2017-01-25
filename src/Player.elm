@@ -1,7 +1,7 @@
 module Player exposing (Player, updatePlayer)
 
 import Vector2 as V2
-import GameTypes exposing (Controles(..), ActiveElement(..))
+import GameTypes exposing (Force(..), ActiveElement(..))
 
 
 type alias Vector =
@@ -19,7 +19,7 @@ type alias Player =
     }
 
 
-updatePlayer : DeltaTime -> ActiveElement -> Player -> Controles -> Player
+updatePlayer : DeltaTime -> ActiveElement -> Player -> Force -> Player
 updatePlayer dt activeElement player moveDirection =
     let
         gravity =

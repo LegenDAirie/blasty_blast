@@ -19,10 +19,12 @@ renderPlayer player =
 
 renderBarrel : Barrel -> Renderable
 renderBarrel barrel =
-    Render.rectangle
+    Render.rectangleWithOptions
         { color = Color.brown
-        , position = barrel.location
+        , position = ( getX barrel.location, getY barrel.location, 0 )
+        , rotation = barrel.angle
         , size = ( toFloat barrel.collisionRadius, toFloat barrel.collisionRadius )
+        , pivot = ( 0.5, 0.5 )
         }
 
 

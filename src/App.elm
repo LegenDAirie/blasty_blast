@@ -13,7 +13,7 @@ import Window
 import Task
 import Player exposing (Player, updatePlayer)
 import Barrel exposing (updateBarrel)
-import GameTypes exposing (Barrel, Vector, Controles(..), ActiveElement(..))
+import GameTypes exposing (Barrel, Vector, Force(..), Controles(..), ActiveElement(..))
 import Draw exposing (renderPlayer, renderBarrel, renderTouch)
 import Color
 
@@ -23,9 +23,10 @@ type alias Model =
     , player : Player
     , barrels : List Barrel
     , active : ActiveElement
-    , move : Controles
+    , move : Force
     , camera : Camera
     , touchLocation : Vector
+    , debug : String
     }
 
 
@@ -40,8 +41,9 @@ initialModel =
     , barrels = [ Barrel ( -300, -100 ) (pi / 4) 35, Barrel ( 300, -100 ) (3 * pi / 4) 35 ]
     , active = ThePlayer
     , move = GoWithTheFlow
-    , camera = Camera.fixedWidth 1280 ( 0, 0 )
+    , camera = Camera.fixedWidth 1280 ( -300, 100 )
     , touchLocation = ( 0, 0 )
+    , debug = ""
     }
 
 
@@ -54,10 +56,6 @@ type Msg
     = NoOp
     | SetCanvasSize Window.Size
     | Tick DeltaTime
-    | MoveLeft
-    | MoveRight
-    | DontMove
-    | Fire
     | SingleTouchMsg SingleTouch
 
 
@@ -81,60 +79,6 @@ update msg model =
             }
                 ! []
 
-        MoveLeft ->
-            case model.active of
-                ThePlayer ->
-                    { model
-                        | move = GoLeft
-                    }
-                        ! []
-
-                ThisBarrel barrel ->
-                    let
-                        transformBarrel =
-                            Barrel.rotate (pi / 4)
-                    in
-                        { model
-                            | barrels = updateBarrel transformBarrel model.barrels barrel
-                        }
-                            ! []
-
-        MoveRight ->
-            case model.active of
-                ThePlayer ->
-                    { model
-                        | move = GoRight
-                    }
-                        ! []
-
-                ThisBarrel barrel ->
-                    let
-                        fn =
-                            Barrel.rotate (-pi / 4)
-                    in
-                        { model
-                            | barrels = updateBarrel fn model.barrels barrel
-                        }
-                            ! []
-
-        DontMove ->
-            { model
-                | move = GoWithTheFlow
-            }
-                ! []
-
-        Fire ->
-            case model.active of
-                ThePlayer ->
-                    model ! []
-
-                ThisBarrel barrel ->
-                    { model
-                        | player = fireFromBarrel barrel model.player
-                        , active = ThePlayer
-                    }
-                        ! []
-
         SingleTouchMsg touchEvent ->
             let
                 { clientX, clientY } =
@@ -151,9 +95,105 @@ update msg model =
 
                 newTouchLocation =
                     convertTouchCoorToGameCoor gameSize sizeRatio model.camera ( clientX, clientY )
+
+                touchScreenLocation =
+                    ( clientX, clientY )
+                        |> convertToGameUnits sizeRatio
+
+                buttonPressed =
+                    calculateControles touchEvent.touchType touchScreenLocation
+
+                newModel =
+                    case buttonPressed of
+                        Left ->
+                            moveLeft model
+
+                        Right ->
+                            moveRight model
+
+                        Fire ->
+                            fire model
+
+                        None ->
+                            dontMove model
             in
-                { model | touchLocation = newTouchLocation }
+                { newModel
+                    | touchLocation = newTouchLocation
+                }
                     ! []
+
+
+calculateControles : TouchEvent -> Vector -> Controles
+calculateControles touchType ( x, y ) =
+    case touchType of
+        TouchStart ->
+            if x < 320 then
+                Left
+            else if x >= 320 && x < 960 then
+                Fire
+            else if x > 960 then
+                Right
+            else
+                None
+
+        _ ->
+            None
+
+
+fire : Model -> Model
+fire model =
+    case model.active of
+        ThePlayer ->
+            model
+
+        ThisBarrel barrel ->
+            { model
+                | player = fireFromBarrel barrel model.player
+                , active = ThePlayer
+            }
+
+
+moveLeft : Model -> Model
+moveLeft model =
+    case model.active of
+        ThePlayer ->
+            { model
+                | move = GoLeft
+            }
+
+        ThisBarrel barrel ->
+            let
+                transformBarrel =
+                    Barrel.rotate (pi / 4)
+            in
+                { model
+                    | barrels = updateBarrel transformBarrel model.barrels barrel
+                }
+
+
+moveRight : Model -> Model
+moveRight model =
+    case model.active of
+        ThePlayer ->
+            { model
+                | move = GoRight
+            }
+
+        ThisBarrel barrel ->
+            let
+                transformBarrel =
+                    Barrel.rotate (-pi / 4)
+            in
+                { model
+                    | barrels = updateBarrel transformBarrel model.barrels barrel
+                }
+
+
+dontMove : Model -> Model
+dontMove model =
+    { model
+        | move = GoWithTheFlow
+    }
 
 
 convertTouchCoorToGameCoor : Vector -> Float -> Camera -> Vector -> Vector
@@ -248,8 +288,8 @@ view model =
         -- test touch
         -- ( gameWidth, gameHeight ) =
         --     getViewSize ( canvasWidth, canvasHeight ) model.camera
-        -- ( touchX, touchY ) =
-        --     ( getX model.touchLocation, getY model.touchLocation )
+        ( touchX, touchY ) =
+            ( getX model.touchLocation, getY model.touchLocation )
     in
         div []
             [ Game.renderCenteredWithOptions
@@ -263,7 +303,10 @@ view model =
                 }
                 (render model)
               -- test touch
-              -- , div [ style [ ( "width", "50px" ), ( "height", "50px" ), ( "border", "solid 1px black" ), ( "position", "absolute" ), ( "top", "0" ), ( "left", "0" ) ] ] [ Html.text <| toString ( touchX, touchY ) ]
+            , div
+                [ style [ ( "font-size", "72px" ), ( "position", "relative" ), ( "top", "-100" ), ( "left", "-100" ) ]
+                ]
+                [ Html.text <| model.debug ]
             ]
 
 

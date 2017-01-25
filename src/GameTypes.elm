@@ -2,15 +2,23 @@ module GameTypes
     exposing
         ( Barrel
         , Vector
+        , Force(..)
         , Controles(..)
         , ActiveElement(..)
         )
 
 
-type Controles
+type Force
     = GoLeft
     | GoRight
     | GoWithTheFlow
+
+
+type Controles
+    = Left
+    | Right
+    | Fire
+    | None
 
 
 type ActiveElement
