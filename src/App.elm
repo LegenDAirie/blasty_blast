@@ -11,11 +11,12 @@ import SingleTouch exposing (SingleTouch, onSingleTouch)
 import AnimationFrame
 import Window
 import Task
+import Color
 import Player exposing (Player, updatePlayer)
 import Barrel exposing (updateBarrel)
 import GameTypes exposing (Barrel, Vector, Force(..), Controles(..), ActiveElement(..))
 import Draw exposing (renderPlayer, renderBarrel, renderTouch)
-import Color
+import Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits)
 
 
 type alias Model =
@@ -23,7 +24,7 @@ type alias Model =
     , player : Player
     , barrels : List Barrel
     , active : ActiveElement
-    , move : Force
+    , force : Force
     , camera : Camera
     , touchLocation : Vector
     , debug : String
@@ -40,7 +41,7 @@ initialModel =
     , player = Player ( -300, 100 ) ( 0, 0 ) 35
     , barrels = [ Barrel ( -300, -100 ) (pi / 4) 35, Barrel ( 300, -100 ) (3 * pi / 4) 35 ]
     , active = ThePlayer
-    , move = GoWithTheFlow
+    , force = GoWithTheFlow
     , camera = Camera.fixedWidth 1280 ( -300, 100 )
     , touchLocation = ( 0, 0 )
     , debug = ""
@@ -73,7 +74,7 @@ update msg model =
 
         Tick dt ->
             { model
-                | player = updatePlayer dt model.active model.player model.move
+                | player = updatePlayer dt model.active model.player model.force
                 , active = calculateActiveElement model.player model.barrels
                 , camera = Camera.follow 0.5 0.17 model.player.location model.camera
             }
@@ -158,7 +159,7 @@ moveLeft model =
     case model.active of
         ThePlayer ->
             { model
-                | move = GoLeft
+                | force = GoLeft
             }
 
         ThisBarrel barrel ->
@@ -176,7 +177,7 @@ moveRight model =
     case model.active of
         ThePlayer ->
             { model
-                | move = GoRight
+                | force = GoRight
             }
 
         ThisBarrel barrel ->
@@ -192,42 +193,8 @@ moveRight model =
 dontMove : Model -> Model
 dontMove model =
     { model
-        | move = GoWithTheFlow
+        | force = GoWithTheFlow
     }
-
-
-convertTouchCoorToGameCoor : Vector -> Float -> Camera -> Vector -> Vector
-convertTouchCoorToGameCoor gameSize sizeRatio camera touchLocation =
-    touchLocation
-        |> convertToGameUnits sizeRatio
-        |> offSetOrigin gameSize
-        |> offSetByCamera camera
-        |> flipY
-
-
-flipY : Vector -> Vector
-flipY ( x, y ) =
-    ( x, -y )
-
-
-convertToGameUnits : Float -> Vector -> Vector
-convertToGameUnits sizeRatio touchLocation =
-    V2.scale sizeRatio touchLocation
-
-
-offSetOrigin : Vector -> Vector -> Vector
-offSetOrigin gameSize touchLocation =
-    gameSize
-        |> V2.scale 0.5
-        |> V2.sub touchLocation
-
-
-offSetByCamera : Camera -> Vector -> Vector
-offSetByCamera camera touchLocation =
-    camera
-        |> getPosition
-        |> flipY
-        |> V2.add touchLocation
 
 
 fireFromBarrel : Barrel -> Player -> Player
@@ -285,11 +252,8 @@ view model =
         ( canvasWidth, canvasHeight ) =
             sizeCanvas model.windowSize
 
-        -- test touch
-        -- ( gameWidth, gameHeight ) =
-        --     getViewSize ( canvasWidth, canvasHeight ) model.camera
-        ( touchX, touchY ) =
-            ( getX model.touchLocation, getY model.touchLocation )
+        -- ( touchX, touchY ) =
+        --     ( getX model.touchLocation, getY model.touchLocation )
     in
         div []
             [ Game.renderCenteredWithOptions
