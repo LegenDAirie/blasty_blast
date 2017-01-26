@@ -2,7 +2,7 @@ module Player exposing (updatePlayer, fireFromBarrel)
 
 import Vector2 as V2
 import GameTypes exposing (Force(..), ActiveElement(..), Player, Barrel)
-import Forces exposing (gravity, controllerLeftForce, controllerRightForce, blastForce)
+import Forces exposing (gravity, controllerLeftForce, controllerRightForce, speedCap, resistance, blastForce)
 
 
 type alias Vector =
@@ -35,13 +35,19 @@ updatePlayer dt activeElement player moveDirection =
             player.velocity
                 |> V2.add gravitationalForce
                 |> V2.add currentControllerForce
-                |> capHorizontalVelocity 100
-                |> capVerticalVelocity 100
+                |> (\( x, y ) -> ( x * resistance, y ))
+                |> capHorizontalVelocity speedCap
+                |> capVerticalVelocity speedCap
+
+        newLocation =
+            newVelocity
+                |> V2.add player.location
+                |> resetPlayerToOrigin
     in
         case activeElement of
             ThePlayer ->
                 { player
-                    | location = V2.add player.location newVelocity
+                    | location = newLocation
                     , velocity = newVelocity
                 }
 
@@ -50,6 +56,14 @@ updatePlayer dt activeElement player moveDirection =
                     | location = barrel.location
                     , velocity = ( 0, 0 )
                 }
+
+
+resetPlayerToOrigin : Vector -> Vector
+resetPlayerToOrigin location =
+    if V2.getY location < -1000 then
+        ( 0, 0 )
+    else
+        location
 
 
 fireFromBarrel : Barrel -> Player -> Player

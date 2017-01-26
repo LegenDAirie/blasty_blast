@@ -40,11 +40,11 @@ initialModel : Model
 initialModel =
     let
         startingPoint =
-            ( -300, 100 )
+            ( 0, 0 )
     in
         { windowSize = { width = 0, height = 0 }
-        , player = Player startingPoint ( 0, 0 ) 60
-        , barrels = [ Barrel ( -300, -100 ) (pi / 4) 60, Barrel ( 300, -100 ) (3 * pi / 4) 60 ]
+        , player = Player startingPoint ( 0, 0 ) 45
+        , barrels = [ Barrel ( 0, -100 ) (3 * pi / 4) 45, Barrel ( 200, -100 ) (pi / 4) 45 ]
         , active = ThePlayer
         , force = GoWithTheFlow
         , camera = Camera.fixedWidth 1280 startingPoint
@@ -208,7 +208,7 @@ view model =
             , div
                 [ style [ ( "font-size", "72px" ), ( "position", "relative" ), ( "top", "-100" ), ( "left", "-100" ) ]
                 ]
-                [ Html.text <| model.debug ]
+                [ Html.text <| toString <| getX <| model.player.location ]
             ]
 
 

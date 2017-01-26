@@ -1,27 +1,34 @@
-module Forces exposing (moveLeft, moveRight, dontMove, gravity, controllerLeftForce, controllerRightForce, blastForce)
+module Forces exposing (moveLeft, moveRight, dontMove, gravity, controllerLeftForce, controllerRightForce, speedCap, resistance, blastForce)
 
 import GameTypes exposing (ActiveElement(..), Controles(..), Force(..), Barrel, Model, Vector)
 import Barrel exposing (updateBarrel)
 
 
-gravity : Vector
-gravity =
-    ( 0, -50 )
+speedCap =
+    10
 
 
-blastForce : Float
 blastForce =
     20
 
 
+resistance =
+    0.98
+
+
+gravity : Vector
+gravity =
+    ( 0, -30 )
+
+
 controllerLeftForce : Vector
 controllerLeftForce =
-    ( -20, 0 )
+    ( -50, 0 )
 
 
 controllerRightForce : Vector
 controllerRightForce =
-    ( 20, 0 )
+    ( 50, 0 )
 
 
 moveLeft : Model -> Model
