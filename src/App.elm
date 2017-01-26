@@ -81,7 +81,7 @@ update msg model =
             { model
                 | player = updatePlayer dt model.active model.player model.force
                 , active = calculateActiveElement model.player model.barrels
-                , camera = Camera.follow 0.5 0.17 model.player.location model.camera
+                , camera = Camera.follow 0.5 0.17 (V2.sub model.player.location ( -100, -100 )) model.camera
             }
                 ! []
 
