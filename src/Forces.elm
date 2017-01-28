@@ -1,6 +1,6 @@
 module Forces exposing (moveLeft, moveRight, dontMove, gravity, controllerLeftForce, controllerRightForce, speedCap, resistance, blastForce)
 
-import GameTypes exposing (ActiveElement(..), Controles(..), Force(..), Barrel, Model, Vector)
+import GameTypes exposing (ActiveElement(..), PlayTestControles(..), Force(..), Barrel, Model, Vector)
 import Barrel exposing (updateBarrel)
 
 

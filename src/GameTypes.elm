@@ -7,7 +7,7 @@ module GameTypes
         , DeltaTime
         , CreateMode(..)
         , Force(..)
-        , Controles(..)
+        , PlayTestControles(..)
         , ActiveElement(..)
         )
 
@@ -39,10 +39,21 @@ type Force
     | GoWithTheFlow
 
 
-type Controles
+
+-- play controles
+-- type Controles
+--     = Left
+--     | Right
+--     | Fire
+--     | None
+-- playtest controles
+
+
+type PlayTestControles
     = Left
     | Right
     | Fire
+      -- | SwitchToEditMode
     | None
 
 

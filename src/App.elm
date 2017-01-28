@@ -13,7 +13,7 @@ import Task
 import Color
 import Player exposing (updatePlayer, fireFromBarrel)
 import Barrel exposing (updateBarrel)
-import GameTypes exposing (Model, Barrel, Player, Vector, DeltaTime, CreateMode(..), Force(..), Controles(..), ActiveElement(..))
+import GameTypes exposing (Model, Barrel, Player, Vector, DeltaTime, CreateMode(..), Force(..), PlayTestControles(..), ActiveElement(..))
 import Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
 import Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits)
 import Forces exposing (moveLeft, moveRight, dontMove)
@@ -90,22 +90,51 @@ update msg model =
                     ( clientX, clientY )
                         |> convertToGameUnits sizeRatio
 
-                buttonPressed =
-                    calculateControles touchEvent.touchType touchScreenLocation
-
                 newModel =
-                    case buttonPressed of
-                        Left ->
-                            moveLeft model
+                    case model.mode of
+                        PlayTest ->
+                            let
+                                buttonPressed =
+                                    calculatePlayTestControles touchEvent.touchType touchScreenLocation
+                            in
+                                case buttonPressed of
+                                    Left ->
+                                        moveLeft model
 
-                        Right ->
-                            moveRight model
+                                    Right ->
+                                        moveRight model
 
-                        Fire ->
-                            fire model
+                                    Fire ->
+                                        fire model
 
-                        None ->
-                            dontMove model
+                                    -- SwitchToEditMode ->
+                                    --     { model |
+                                    --         mode = Edit
+                                    --     }
+                                    None ->
+                                        dontMove model
+
+                        Edit ->
+                            let
+                                buttonPressed =
+                                    calculatePlayTestControles touchEvent.touchType touchScreenLocation
+                            in
+                                case buttonPressed of
+                                    Left ->
+                                        moveLeft model
+
+                                    Right ->
+                                        moveRight model
+
+                                    Fire ->
+                                        fire model
+
+                                    -- SwitchToEditMode ->
+                                    --     { model |
+                                    --         mode = Edit
+                                    --     }
+                                    None ->
+                                        dontMove model
             in
                 { newModel
                     | touchLocation = newTouchLocation
@@ -113,8 +142,8 @@ update msg model =
                     ! []
 
 
-calculateControles : TouchEvent -> Vector -> Controles
-calculateControles touchType ( x, y ) =
+calculatePlayTestControles : TouchEvent -> Vector -> PlayTestControles
+calculatePlayTestControles touchType ( x, y ) =
     case touchType of
         TouchStart ->
             if x < 320 then
