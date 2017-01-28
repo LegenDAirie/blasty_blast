@@ -4,6 +4,8 @@ module GameTypes
         , Barrel
         , Player
         , Vector
+        , DeltaTime
+        , CreateMode(..)
         , Force(..)
         , Controles(..)
         , ActiveElement(..)
@@ -21,8 +23,14 @@ type alias Model =
     , force : Force
     , camera : Camera
     , touchLocation : Vector
+    , mode : CreateMode
     , debug : String
     }
+
+
+type CreateMode
+    = PlayTest
+    | Edit
 
 
 type Force
@@ -45,6 +53,10 @@ type ActiveElement
 
 type alias Vector =
     ( Float, Float )
+
+
+type alias DeltaTime =
+    Float
 
 
 type alias Player =

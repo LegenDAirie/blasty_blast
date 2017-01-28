@@ -3,7 +3,6 @@ module App exposing (..)
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
 import Vector2 as V2 exposing (distance, normalize, setX, getX, getY)
-import Game.TwoD.Render as Render exposing (Renderable)
 import Game.TwoD as Game
 import Game.TwoD.Camera as Camera exposing (Camera, getViewSize, getPosition)
 import Touch exposing (TouchEvent(..), Touch)
@@ -14,26 +13,10 @@ import Task
 import Color
 import Player exposing (updatePlayer, fireFromBarrel)
 import Barrel exposing (updateBarrel)
-import GameTypes exposing (Barrel, Player, Vector, Force(..), Controles(..), ActiveElement(..))
-import Draw exposing (renderPlayer, renderBarrel, renderTouch)
+import GameTypes exposing (Model, Barrel, Player, Vector, DeltaTime, CreateMode(..), Force(..), Controles(..), ActiveElement(..))
+import Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
 import Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits)
 import Forces exposing (moveLeft, moveRight, dontMove)
-
-
-type alias Model =
-    { windowSize : Window.Size
-    , player : Player
-    , barrels : List Barrel
-    , active : ActiveElement
-    , force : Force
-    , camera : Camera
-    , touchLocation : Vector
-    , debug : String
-    }
-
-
-type alias DeltaTime =
-    Float
 
 
 initialModel : Model
@@ -49,6 +32,7 @@ initialModel =
         , force = GoWithTheFlow
         , camera = Camera.fixedWidth 1280 startingPoint
         , touchLocation = ( 0, 0 )
+        , mode = PlayTest
         , debug = ""
         }
 
@@ -189,9 +173,6 @@ view model =
     let
         ( canvasWidth, canvasHeight ) =
             sizeCanvas model.windowSize
-
-        -- ( touchX, touchY ) =
-        --     ( getX model.touchLocation, getY model.touchLocation )
     in
         div []
             [ Game.renderCenteredWithOptions
@@ -210,15 +191,6 @@ view model =
                 ]
                 [ Html.text <| toString <| getX <| model.player.location ]
             ]
-
-
-render : Model -> List Renderable
-render model =
-    List.concat
-        [ [ renderPlayer model.player ]
-        , (List.map renderBarrel model.barrels)
-        , [ renderTouch model.touchLocation model.camera ]
-        ]
 
 
 sizeCanvas : Window.Size -> ( Float, Float )
