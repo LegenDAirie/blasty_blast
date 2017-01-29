@@ -13,6 +13,7 @@ module GameTypes
 
 import Window
 import Game.TwoD.Camera as Camera exposing (Camera, getViewSize, getPosition)
+import Game.Resources as Resources exposing (Resources)
 
 
 type alias Model =
@@ -22,6 +23,7 @@ type alias Model =
     , active : ActiveElement
     , force : Force
     , camera : Camera
+    , resources : Resources
     , touchLocation : Vector
     , mode : CreateMode
     , debug : String

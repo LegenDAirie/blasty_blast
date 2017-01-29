@@ -1,6 +1,9 @@
 # Distribution
 dist/
 
+# Images
+assets
+
 # elm-package generated files
 elm-stuff
 

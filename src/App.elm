@@ -3,6 +3,7 @@ module App exposing (..)
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
 import Vector2 as V2 exposing (distance, normalize, setX, getX, getY)
+import Game.Resources as Resources exposing (Resources)
 import Game.TwoD as Game
 import Game.TwoD.Camera as Camera exposing (Camera, getViewSize, getPosition)
 import Touch exposing (TouchEvent(..), Touch)
@@ -31,6 +32,7 @@ initialModel =
         , active = ThePlayer
         , force = GoWithTheFlow
         , camera = Camera.fixedWidth 1280 startingPoint
+        , resources = Resources.init
         , touchLocation = ( 0, 0 )
         , mode = PlayTest
         , debug = ""
@@ -39,7 +41,10 @@ initialModel =
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, Task.perform SetCanvasSize Window.size )
+    initialModel
+        ! [ Task.perform SetCanvasSize Window.size
+          , Cmd.map Resources <| Resources.loadTextures [ "../assets/ghost-friend.png" ]
+          ]
 
 
 type Msg
@@ -47,6 +52,7 @@ type Msg
     | SetCanvasSize Window.Size
     | Tick DeltaTime
     | SingleTouchMsg SingleTouch
+    | Resources Resources.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -67,6 +73,10 @@ update msg model =
                 , active = calculateActiveElement model.player model.barrels
                 , camera = Camera.follow 0.5 0.17 (V2.sub model.player.location ( -100, -100 )) model.camera
             }
+                ! []
+
+        Resources msg ->
+            { model | resources = Resources.update msg model.resources }
                 ! []
 
         SingleTouchMsg touchEvent ->

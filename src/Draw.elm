@@ -3,6 +3,7 @@ module Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
 import Game.TwoD.Render as Render exposing (Renderable)
 import Game.TwoD.Camera as Camera exposing (Camera, getPosition, getViewSize)
 import GameTypes exposing (Model, Vector, Player, Barrel, CreateMode(..))
+import Game.Resources as Resources exposing (Resources)
 import Vector2 as V2 exposing (getX, getY)
 import Color
 import Window
@@ -20,7 +21,7 @@ render model =
                     renderEditModeOverlay model
     in
         List.concat
-            [ [ renderPlayer model.player ]
+            [ [ renderPlayer model.resources model.player ]
             , (List.map renderBarrel model.barrels)
             , [ renderTouch model.touchLocation model.camera ]
             , overlay
@@ -141,13 +142,31 @@ renderEditHudBar camera =
             }
 
 
-renderPlayer : Player -> Renderable
-renderPlayer player =
-    Render.rectangle
-        { color = Color.charcoal
-        , position = player.location
-        , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
-        }
+renderPlayer : Resources -> Player -> Renderable
+renderPlayer resources player =
+    let
+        ( x, y ) =
+            player.location
+    in
+        Render.animatedSpriteWithOptions
+            { position = ( x, y, 0 )
+            , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
+            , texture = Resources.getTexture "../assets/ghost-friend.png" resources
+            , bottomLeft = ( 0, 0 )
+            , topRight = ( 1, 1 )
+            , duration = 1
+            , numberOfFrames = 8
+            , rotation = 0
+            , pivot = ( 0.5, 0 )
+            }
+
+
+
+-- Render.rectangle
+--     { color = Color.charcoal
+--     , position = player.location
+--     , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
+--     }
 
 
 renderBarrel : Barrel -> Renderable
