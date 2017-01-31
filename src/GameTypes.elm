@@ -6,7 +6,7 @@ module GameTypes
         , Vector
         , DeltaTime
         , CreateMode(..)
-        , PlayTestControles(..)
+        , PlayTestControls(..)
         , ActiveElement(..)
         )
 
@@ -45,7 +45,7 @@ type CreateMode
     | Edit
 
 
-type PlayTestControles
+type PlayTestControls
     = Left
     | Right
     | Fire

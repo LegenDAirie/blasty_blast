@@ -66,6 +66,16 @@ resetPlayerToOrigin location =
         location
 
 
+fire : ActiveElement -> Player -> Player
+fire activeElement player =
+    case activeElement of
+        ThePlayer ->
+            player
+
+        ThisBarrel barrel ->
+            fireFromBarrel barrel player
+
+
 fireFromBarrel : Barrel -> Player -> Player
 fireFromBarrel barrel player =
     let

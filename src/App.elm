@@ -13,9 +13,11 @@ import Window
 import Task
 import Dict exposing (values)
 import Player exposing (updatePlayer, fireFromBarrel)
-import GameTypes exposing (Model, Barrel, Player, Vector, DeltaTime, CreateMode(..), PlayTestControles(..), ActiveElement(..))
+import GameTypes exposing (Model, Barrel, Player, Vector, DeltaTime, CreateMode(..), PlayTestControls(..), ActiveElement(..))
+import GameLogic exposing (calculateActiveElement)
 import Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
 import Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits, gameSize)
+import Controls exposing (calculateButtonsPressed)
 
 
 initialModel : Model
@@ -58,8 +60,19 @@ update msg model =
             model ! []
 
         SetCanvasSize size ->
+            { model | canvasSize = setCanvasSize size }
+                ! []
+
+        Resources msg ->
+            { model | resources = Resources.update msg model.resources }
+                ! []
+
+        MultiTouchMsg multiTouch ->
             { model
-                | canvasSize = setCanvasSize size
+                | touchLocations =
+                    values multiTouch.touches
+                        |> List.map (\{ clientX, clientY } -> ( clientX, clientY ))
+                        |> List.map (convertToGameUnits model.canvasSize)
             }
                 ! []
 
@@ -76,87 +89,6 @@ update msg model =
                     , camera = Camera.follow 0.5 0.17 (V2.sub model.player.location ( -100, -100 )) model.camera
                 }
                     ! []
-
-        Resources msg ->
-            { model | resources = Resources.update msg model.resources }
-                ! []
-
-        MultiTouchMsg multiTouch ->
-            { model
-                | touchLocations =
-                    values multiTouch.touches
-                        |> List.map (\{ clientX, clientY } -> ( clientX, clientY ))
-                        |> List.map (convertToGameUnits model.canvasSize)
-            }
-                ! []
-
-
-calculateButtonsPressed : CreateMode -> List Vector -> List PlayTestControles
-calculateButtonsPressed mode touchLocations =
-    let
-        buttonPressed =
-            case mode of
-                PlayTest ->
-                    calculatePlayTestControles touchLocations
-
-                Edit ->
-                    calculatePlayTestControles touchLocations
-    in
-        [ buttonPressed ]
-
-
-calculatePlayTestControles : List Vector -> PlayTestControles
-calculatePlayTestControles touchLocations =
-    case touchLocations of
-        ( x, y ) :: rest ->
-            if x < 320 then
-                Left
-            else if x >= 320 && x < 960 then
-                Fire
-            else if x > 960 then
-                Right
-            else
-                None
-
-        _ ->
-            None
-
-
-fire : ActiveElement -> Model -> Model
-fire activeElement model =
-    case activeElement of
-        ThePlayer ->
-            model
-
-        ThisBarrel barrel ->
-            { model
-                | player = fireFromBarrel barrel model.player
-            }
-
-
-calculateActiveElement : Player -> List Barrel -> ActiveElement
-calculateActiveElement player barrels =
-    case barrels of
-        barrel :: rest ->
-            if hasCollided player barrel then
-                ThisBarrel barrel
-            else
-                calculateActiveElement player rest
-
-        [] ->
-            ThePlayer
-
-
-hasCollided : Player -> Barrel -> Bool
-hasCollided player barrel =
-    let
-        distanceBetween =
-            distance player.location barrel.location
-
-        collectiveRadius =
-            player.collisionRadius + barrel.collisionRadius
-    in
-        distanceBetween < toFloat collectiveRadius
 
 
 view : Model -> Html Msg
