@@ -1,15 +1,19 @@
-module Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits)
+module Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits, gameSize)
 
 import GameTypes exposing (Vector)
 import Vector2 as V2 exposing (distance, normalize, setX, getX, getY)
 import Game.TwoD.Camera as Camera exposing (Camera, getViewSize, getPosition)
 
 
-convertTouchCoorToGameCoor : Vector -> Float -> Camera -> Vector -> Vector
-convertTouchCoorToGameCoor gameSize sizeRatio camera touchLocation =
+gameSize : Vector
+gameSize =
+    ( 1280, 720 )
+
+
+convertTouchCoorToGameCoor : Camera -> Vector -> Vector
+convertTouchCoorToGameCoor camera touchLocation =
     touchLocation
-        |> convertToGameUnits sizeRatio
-        |> offSetOrigin gameSize
+        |> offSetOrigin
         |> offSetByCamera camera
         |> flipY
 
@@ -20,12 +24,12 @@ flipY ( x, y ) =
 
 
 convertToGameUnits : Float -> Vector -> Vector
-convertToGameUnits sizeRatio touchLocation =
-    V2.scale sizeRatio touchLocation
+convertToGameUnits canvasWidth touchLocation =
+    V2.scale (getX gameSize / canvasWidth) touchLocation
 
 
-offSetOrigin : Vector -> Vector -> Vector
-offSetOrigin gameSize touchLocation =
+offSetOrigin : Vector -> Vector
+offSetOrigin touchLocation =
     gameSize
         |> V2.scale 0.5
         |> V2.sub touchLocation
