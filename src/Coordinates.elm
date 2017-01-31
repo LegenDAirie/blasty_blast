@@ -23,9 +23,9 @@ flipY ( x, y ) =
     ( x, -y )
 
 
-convertToGameUnits : Float -> Vector -> Vector
-convertToGameUnits canvasWidth touchLocation =
-    V2.scale (getX gameSize / canvasWidth) touchLocation
+convertToGameUnits : Vector -> Vector -> Vector
+convertToGameUnits canvasSize touchLocation =
+    V2.scale (getX gameSize / getX canvasSize) touchLocation
 
 
 offSetOrigin : Vector -> Vector

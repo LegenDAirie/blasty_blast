@@ -6,7 +6,6 @@ import GameTypes exposing (Model, Vector, Player, Barrel, CreateMode(..))
 import Game.Resources as Resources exposing (Resources)
 import Vector2 as V2 exposing (getX, getY)
 import Color
-import Window
 
 
 render : Model -> List Renderable
@@ -23,7 +22,7 @@ render model =
         List.concat
             [ [ renderPlayer model.resources model.player ]
             , (List.map renderBarrel model.barrels)
-            , [ renderTouch model.touchLocation model.camera ]
+            , List.map (renderTouch model.camera) model.touchLocations
             , overlay
             ]
 
@@ -144,29 +143,26 @@ renderEditHudBar camera =
 
 renderPlayer : Resources -> Player -> Renderable
 renderPlayer resources player =
-    let
-        ( x, y ) =
-            player.location
-    in
-        Render.animatedSpriteWithOptions
-            { position = ( x, y, 0 )
-            , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
-            , texture = Resources.getTexture "../assets/ghost-friend.png" resources
-            , bottomLeft = ( 0, 0 )
-            , topRight = ( 1, 1 )
-            , duration = 1
-            , numberOfFrames = 8
-            , rotation = 0
-            , pivot = ( 0.5, 0 )
-            }
-
-
-
--- Render.rectangle
---     { color = Color.charcoal
---     , position = player.location
---     , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
---     }
+    -- let
+    --     ( x, y ) =
+    --         player.location
+    -- in
+    --     Render.animatedSpriteWithOptions
+    --         { position = ( x, y, 0 )
+    --         , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
+    --         , texture = Resources.getTexture "../assets/ghost-friend.png" resources
+    --         , bottomLeft = ( 0, 0 )
+    --         , topRight = ( 1, 1 )
+    --         , duration = 1
+    --         , numberOfFrames = 8
+    --         , rotation = 0
+    --         , pivot = ( 0.5, 0 )
+    --         }
+    Render.rectangle
+        { color = Color.charcoal
+        , position = player.location
+        , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
+        }
 
 
 renderBarrel : Barrel -> Renderable
@@ -180,8 +176,8 @@ renderBarrel barrel =
         }
 
 
-renderTouch : ( Float, Float ) -> Camera -> Renderable
-renderTouch location camera =
+renderTouch : Camera -> Vector -> Renderable
+renderTouch camera location =
     Render.rectangle
         { color = Color.darkBlue
         , position = location

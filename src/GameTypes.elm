@@ -14,17 +14,18 @@ module GameTypes
 import Window
 import Game.TwoD.Camera as Camera exposing (Camera, getViewSize, getPosition)
 import Game.Resources as Resources exposing (Resources)
+import Touch exposing (TouchEvent(..), Touch)
 
 
 type alias Model =
-    { windowSize : Window.Size
+    { canvasSize : Vector
     , player : Player
     , barrels : List Barrel
     , active : ActiveElement
     , force : Force
     , camera : Camera
     , resources : Resources
-    , touchLocation : Vector
+    , touchLocations : List Vector
     , mode : CreateMode
     , debug : String
     }
@@ -39,16 +40,6 @@ type Force
     = GoLeft
     | GoRight
     | GoWithTheFlow
-
-
-
--- play controles
--- type Controles
---     = Left
---     | Right
---     | Fire
---     | None
--- playtest controles
 
 
 type PlayTestControles
