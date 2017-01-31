@@ -31,9 +31,9 @@ controllerRightForce =
     ( 50, 0 )
 
 
-moveLeft : Model -> Model
-moveLeft model =
-    case model.active of
+moveLeft : ActiveElement -> Model -> Model
+moveLeft activeElement model =
+    case activeElement of
         ThePlayer ->
             { model
                 | force = GoLeft
@@ -49,9 +49,9 @@ moveLeft model =
                 }
 
 
-moveRight : Model -> Model
-moveRight model =
-    case model.active of
+moveRight : ActiveElement -> Model -> Model
+moveRight activeElement model =
+    case activeElement of
         ThePlayer ->
             { model
                 | force = GoRight

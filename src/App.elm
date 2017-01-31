@@ -16,7 +16,6 @@ import Player exposing (updatePlayer, fireFromBarrel)
 import GameTypes exposing (Model, Barrel, Player, Vector, DeltaTime, CreateMode(..), Force(..), PlayTestControles(..), ActiveElement(..))
 import Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
 import Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits, gameSize)
-import Forces exposing (moveLeft, moveRight, dontMove)
 
 
 initialModel : Model
@@ -28,7 +27,6 @@ initialModel =
         { canvasSize = ( 0, 0 )
         , player = Player startingPoint ( 0, 0 ) 45
         , barrels = [ Barrel ( 0, -100 ) (3 * pi / 4) 45, Barrel ( 200, -100 ) (pi / 4) 45 ]
-        , active = ThePlayer
         , force = GoWithTheFlow
         , camera = Camera.fixedWidth (getX gameSize) startingPoint
         , resources = Resources.init
@@ -70,10 +68,12 @@ update msg model =
             let
                 buttonsPressed =
                     calculateButtonsPressed model.mode model.touchLocations
+
+                activeElement =
+                    calculateActiveElement model.player model.barrels
             in
                 { model
-                    | player = updatePlayer dt model.active model.player model.force
-                    , active = calculateActiveElement model.player model.barrels
+                    | player = updatePlayer dt activeElement model.player model.force
                     , camera = Camera.follow 0.5 0.17 (V2.sub model.player.location ( -100, -100 )) model.camera
                 }
                     ! []
@@ -123,16 +123,15 @@ calculatePlayTestControles touchLocations =
             None
 
 
-fire : Model -> Model
-fire model =
-    case model.active of
+fire : ActiveElement -> Model -> Model
+fire activeElement model =
+    case activeElement of
         ThePlayer ->
             model
 
         ThisBarrel barrel ->
             { model
                 | player = fireFromBarrel barrel model.player
-                , active = ThePlayer
             }
 
 

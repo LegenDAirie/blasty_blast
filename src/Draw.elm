@@ -6,7 +6,7 @@ import GameTypes exposing (Model, Vector, Player, Barrel, CreateMode(..))
 import Game.Resources as Resources exposing (Resources)
 import Vector2 as V2 exposing (getX, getY)
 import Color
-import Coordinates exposing (convertTouchCoorToGameCoor)
+import Coordinates exposing (convertTouchCoorToGameCoor, gameSize)
 
 
 render : Model -> List Renderable
@@ -45,7 +45,7 @@ renderEditMode : Camera -> Renderable
 renderEditMode camera =
     let
         ( gameUnitWidth, gameUnitHeight ) =
-            ( 1280, 720 )
+            gameSize
 
         ( editModeWidth, editModeHeight ) =
             ( gameUnitWidth / 8, gameUnitHeight / 5 )
@@ -70,7 +70,7 @@ renderPlayTestMode : Camera -> Renderable
 renderPlayTestMode camera =
     let
         ( gameUnitWidth, gameUnitHeight ) =
-            ( 1280, 720 )
+            gameSize
 
         ( playTestWidth, playTestHeight ) =
             ( gameUnitWidth / 8, gameUnitHeight / 5 )
@@ -95,7 +95,7 @@ renderAddBarrel : Camera -> Renderable
 renderAddBarrel camera =
     let
         ( gameUnitWidth, gameUnitHeight ) =
-            ( 1280, 720 )
+            gameSize
 
         ( addBarrelWidth, addBarrelHeight ) =
             ( gameUnitWidth / 8, gameUnitHeight / 5 )
@@ -119,9 +119,8 @@ renderAddBarrel camera =
 renderEditHudBar : Camera -> Renderable
 renderEditHudBar camera =
     let
-        -- not sure where game resolution should live
         ( gameUnitWidth, gameUnitHeight ) =
-            ( 1280, 720 )
+            gameSize
 
         ( selectionBarWidth, selectionBarHeight ) =
             ( gameUnitWidth, gameUnitHeight / 5 )

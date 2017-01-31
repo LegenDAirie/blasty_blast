@@ -1,19 +1,10 @@
-module Barrel exposing (updateBarrel, rotate, Barrel)
+module Barrel exposing (updateBarrel, rotate)
 
-
-type alias Vector =
-    ( Float, Float )
+import GameTypes exposing (Vector, Barrel)
 
 
 type alias Angle =
     Float
-
-
-type alias Barrel =
-    { location : Vector
-    , angle : Float
-    , collisionRadius : Int
-    }
 
 
 updateBarrel : (Barrel -> Barrel) -> List Barrel -> Barrel -> List Barrel
