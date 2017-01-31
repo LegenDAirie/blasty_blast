@@ -1,7 +1,7 @@
 module Player exposing (updatePlayer, fireFromBarrel)
 
 import Vector2 as V2
-import GameTypes exposing (Force(..), ActiveElement(..), Player, Barrel)
+import GameTypes exposing (ActiveElement(..), Player, Barrel)
 import Forces exposing (gravity, controllerLeftForce, controllerRightForce, speedCap, resistance, blastForce)
 
 
@@ -13,29 +13,29 @@ type alias DeltaTime =
     Float
 
 
-updatePlayer : DeltaTime -> ActiveElement -> Player -> Force -> Player
-updatePlayer dt activeElement player moveDirection =
+updatePlayer : DeltaTime -> ActiveElement -> Player -> Player
+updatePlayer dt activeElement player =
     let
         gravitationalForce =
             V2.scale dt gravity
 
-        currentControllerForce =
-            V2.scale dt <|
-                case moveDirection of
-                    GoLeft ->
-                        controllerLeftForce
-
-                    GoRight ->
-                        controllerRightForce
-
-                    GoWithTheFlow ->
-                        ( 0, 0 )
-
+        -- currentControllerForce =
+        --     V2.scale dt <|
+        --         case moveDirection of
+        --             GoLeft ->
+        --                 controllerLeftForce
+        --
+        --             GoRight ->
+        --                 controllerRightForce
+        --
+        --             GoWithTheFlow ->
+        --                 ( 0, 0 )
         newVelocity =
             player.velocity
                 |> V2.add gravitationalForce
-                |> V2.add currentControllerForce
-                |> (\( x, y ) -> ( x * resistance, y ))
+                -- |> V2.add currentControllerForce
+                |>
+                    (\( x, y ) -> ( x * resistance, y ))
                 |> capHorizontalVelocity speedCap
                 |> capVerticalVelocity speedCap
 

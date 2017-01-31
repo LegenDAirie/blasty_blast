@@ -20,6 +20,17 @@ updateBarrel fn barrels barrelToUpdate =
             []
 
 
+
+-- rotation
+-- let
+--     transformBarrel =
+--         Barrel.rotate (pi / 4)
+-- in
+--     { model
+--         | barrels = updateBarrel transformBarrel model.barrels barrel
+--     }
+
+
 rotate : Angle -> (Barrel -> Barrel)
 rotate offsetAngle barrel =
     { barrel

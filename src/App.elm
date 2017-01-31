@@ -13,7 +13,7 @@ import Window
 import Task
 import Dict exposing (values)
 import Player exposing (updatePlayer, fireFromBarrel)
-import GameTypes exposing (Model, Barrel, Player, Vector, DeltaTime, CreateMode(..), Force(..), PlayTestControles(..), ActiveElement(..))
+import GameTypes exposing (Model, Barrel, Player, Vector, DeltaTime, CreateMode(..), PlayTestControles(..), ActiveElement(..))
 import Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
 import Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits, gameSize)
 
@@ -27,7 +27,6 @@ initialModel =
         { canvasSize = ( 0, 0 )
         , player = Player startingPoint ( 0, 0 ) 45
         , barrels = [ Barrel ( 0, -100 ) (3 * pi / 4) 45, Barrel ( 200, -100 ) (pi / 4) 45 ]
-        , force = GoWithTheFlow
         , camera = Camera.fixedWidth (getX gameSize) startingPoint
         , resources = Resources.init
         , touchLocations = []
@@ -73,7 +72,7 @@ update msg model =
                     calculateActiveElement model.player model.barrels
             in
                 { model
-                    | player = updatePlayer dt activeElement model.player model.force
+                    | player = updatePlayer dt activeElement model.player
                     , camera = Camera.follow 0.5 0.17 (V2.sub model.player.location ( -100, -100 )) model.camera
                 }
                     ! []

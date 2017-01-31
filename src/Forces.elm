@@ -1,17 +1,20 @@
 module Forces exposing (moveLeft, moveRight, dontMove, gravity, controllerLeftForce, controllerRightForce, speedCap, resistance, blastForce)
 
-import GameTypes exposing (ActiveElement(..), PlayTestControles(..), Force(..), Barrel, Model, Vector)
+import GameTypes exposing (ActiveElement(..), PlayTestControles(..), Barrel, Model, Vector)
 import Barrel exposing (updateBarrel)
 
 
+speedCap : Float
 speedCap =
     10
 
 
+blastForce : Float
 blastForce =
     20
 
 
+resistance : Float
 resistance =
     0.98
 
@@ -35,9 +38,7 @@ moveLeft : ActiveElement -> Model -> Model
 moveLeft activeElement model =
     case activeElement of
         ThePlayer ->
-            { model
-                | force = GoLeft
-            }
+            model
 
         ThisBarrel barrel ->
             let
@@ -53,9 +54,7 @@ moveRight : ActiveElement -> Model -> Model
 moveRight activeElement model =
     case activeElement of
         ThePlayer ->
-            { model
-                | force = GoRight
-            }
+            model
 
         ThisBarrel barrel ->
             let
@@ -69,6 +68,4 @@ moveRight activeElement model =
 
 dontMove : Model -> Model
 dontMove model =
-    { model
-        | force = GoWithTheFlow
-    }
+    model

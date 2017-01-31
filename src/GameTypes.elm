@@ -6,7 +6,6 @@ module GameTypes
         , Vector
         , DeltaTime
         , CreateMode(..)
-        , Force(..)
         , PlayTestControles(..)
         , ActiveElement(..)
         )
@@ -19,7 +18,6 @@ type alias Model =
     { canvasSize : Vector
     , player : Player
     , barrels : List Barrel
-    , force : Force
     , camera : Camera
     , resources : Resources
     , touchLocations : List Vector
@@ -45,12 +43,6 @@ type alias Barrel =
 type CreateMode
     = PlayTest
     | Edit
-
-
-type Force
-    = GoLeft
-    | GoRight
-    | GoWithTheFlow
 
 
 type PlayTestControles
