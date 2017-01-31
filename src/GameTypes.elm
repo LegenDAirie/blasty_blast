@@ -21,7 +21,7 @@ type alias Model =
     , camera : Camera
     , resources : Resources
     , touchLocations : List Vector
-    , mode : CreateMode
+    , gameScreen : CreateMode
     , debug : String
     }
 

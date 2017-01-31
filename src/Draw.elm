@@ -13,7 +13,7 @@ render : Model -> List Renderable
 render model =
     let
         overlay =
-            case model.mode of
+            case model.gameScreen of
                 PlayTest ->
                     renderPlayTestOverlay model
 

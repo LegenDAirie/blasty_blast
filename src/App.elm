@@ -30,7 +30,7 @@ initialModel =
         , camera = Camera.fixedWidth (getX gameSize) startingPoint
         , resources = Resources.init
         , touchLocations = []
-        , mode = PlayTest
+        , gameScreen = PlayTest
         , debug = ""
         }
 
@@ -63,16 +63,16 @@ update msg model =
             }
                 ! []
 
-        Tick dt ->
+        Tick deltaTime ->
             let
                 buttonsPressed =
-                    calculateButtonsPressed model.mode model.touchLocations
+                    calculateButtonsPressed model.gameScreen model.touchLocations
 
                 activeElement =
                     calculateActiveElement model.player model.barrels
             in
                 { model
-                    | player = updatePlayer dt activeElement model.player
+                    | player = updatePlayer deltaTime activeElement model.player
                     , camera = Camera.follow 0.5 0.17 (V2.sub model.player.location ( -100, -100 )) model.camera
                 }
                     ! []
