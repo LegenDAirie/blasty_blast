@@ -6,6 +6,7 @@ import GameTypes exposing (Model, Vector, Player, Barrel, CreateMode(..))
 import Game.Resources as Resources exposing (Resources)
 import Vector2 as V2 exposing (getX, getY)
 import Color
+import Coordinates exposing (convertTouchCoorToGameCoor)
 
 
 render : Model -> List Renderable
@@ -180,6 +181,6 @@ renderTouch : Camera -> Vector -> Renderable
 renderTouch camera location =
     Render.rectangle
         { color = Color.darkBlue
-        , position = location
+        , position = convertTouchCoorToGameCoor camera location
         , size = ( toFloat 30, toFloat 30 )
         }
