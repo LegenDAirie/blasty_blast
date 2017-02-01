@@ -13,7 +13,7 @@ import Window
 import Task
 import Dict exposing (values)
 import Player exposing (updatePlayer, fireFromBarrel)
-import GameTypes exposing (Model, Barrel, Player, Vector, DeltaTime, CreateMode(..), PlayTestControls(..), ActiveElement(..))
+import GameTypes exposing (Model, Barrel, Player, Vector, DeltaTime, GameScreens(..), ActiveElement(..))
 import GameLogic exposing (calculateActiveElement)
 import Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
 import Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits, gameSize)

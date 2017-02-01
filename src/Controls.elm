@@ -1,34 +1,63 @@
-module Controls exposing (calculateButtonsPressed)
+module Controls exposing (PlayTestControls(..), calculateButtonsPressed)
 
-import GameTypes exposing (Vector, CreateMode(..), PlayTestControls(..))
-
-
-calculateButtonsPressed : CreateMode -> List Vector -> List PlayTestControls
-calculateButtonsPressed mode touchLocations =
-    let
-        buttonPressed =
-            case mode of
-                PlayTest ->
-                    calculatePlayTestControls touchLocations
-
-                Edit ->
-                    calculatePlayTestControls touchLocations
-    in
-        [ buttonPressed ]
+import GameTypes exposing (Vector, GameScreens(..))
 
 
-calculatePlayTestControls : List Vector -> PlayTestControls
-calculatePlayTestControls touchLocations =
-    case touchLocations of
-        ( x, y ) :: rest ->
-            if x < 320 then
-                Left
-            else if x >= 320 && x < 960 then
-                Fire
-            else if x > 960 then
-                Right
-            else
-                None
+type GameControls
+    = PlayTestControls
+    | LevelEditControls
 
-        _ ->
-            None
+
+type LevelEditControls
+    = AddBarrel
+    | PlayTestMode
+
+
+type PlayTestControls
+    = DPad Direction
+    | Fire
+    | EditMode
+
+
+type Direction
+    = Left
+    | Right
+
+
+calculateButtonsPressed : GameScreens -> List Vector -> List GameControls
+calculateButtonsPressed gameScreen touchLocations =
+    List.filterMap (convertTouchToButton gameScreen) touchLocations
+
+
+
+-- |> List.filterMap (\item -> item /= Nothing)
+
+
+convertTouchToButton : GameScreens -> Vector -> Maybe GameControls
+convertTouchToButton gameScreen touchLocation =
+    Just PlayTestControls
+
+
+
+-- case gameScreen of
+--     PlayTest ->
+--         calculatePlayTestControls touchLocation
+--
+--     LevelEdit ->
+--         calculatePlayTestControls touchLocation
+
+
+calculatePlayTestControls : Vector -> Maybe PlayTestControls
+calculatePlayTestControls ( x, y ) =
+    Just Fire
+
+
+
+-- if x < 320 then
+--     Just (DPad Left)
+-- else if x >= 320 && x < 960 then
+--     Just Fire
+-- else if x > 960 then
+--     Just (DPad Right)
+-- else
+--     Nothing

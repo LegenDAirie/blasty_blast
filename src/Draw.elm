@@ -2,7 +2,7 @@ module Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
 
 import Game.TwoD.Render as Render exposing (Renderable)
 import Game.TwoD.Camera as Camera exposing (Camera, getPosition, getViewSize)
-import GameTypes exposing (Model, Vector, Player, Barrel, CreateMode(..))
+import GameTypes exposing (Model, Vector, Player, Barrel, GameScreens(..))
 import Game.Resources as Resources exposing (Resources)
 import Vector2 as V2 exposing (getX, getY)
 import Color
@@ -17,7 +17,7 @@ render model =
                 PlayTest ->
                     renderPlayTestOverlay model
 
-                Edit ->
+                LevelEdit ->
                     renderEditModeOverlay model
     in
         List.concat

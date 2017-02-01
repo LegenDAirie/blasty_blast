@@ -5,8 +5,7 @@ module GameTypes
         , Player
         , Vector
         , DeltaTime
-        , CreateMode(..)
-        , PlayTestControls(..)
+        , GameScreens(..)
         , ActiveElement(..)
         )
 
@@ -21,7 +20,7 @@ type alias Model =
     , camera : Camera
     , resources : Resources
     , touchLocations : List Vector
-    , gameScreen : CreateMode
+    , gameScreen : GameScreens
     , debug : String
     }
 
@@ -40,17 +39,9 @@ type alias Barrel =
     }
 
 
-type CreateMode
+type GameScreens
     = PlayTest
-    | Edit
-
-
-type PlayTestControls
-    = Left
-    | Right
-    | Fire
-      -- | SwitchToEditMode
-    | None
+    | LevelEdit
 
 
 type ActiveElement

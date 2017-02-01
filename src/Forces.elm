@@ -1,7 +1,10 @@
 module Forces exposing (moveLeft, moveRight, dontMove, gravity, controllerLeftForce, controllerRightForce, speedCap, resistance, blastForce)
 
-import GameTypes exposing (ActiveElement(..), PlayTestControls(..), Barrel, Model, Vector)
+import GameTypes exposing (ActiveElement(..), Barrel, Model, Vector)
 import Barrel exposing (updateBarrel)
+
+
+-- import Controls exposing (PlayTestControls(..))
 
 
 speedCap : Float
