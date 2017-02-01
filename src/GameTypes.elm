@@ -5,7 +5,9 @@ module GameTypes
         , Player
         , Vector
         , DeltaTime
-        , GameScreens(..)
+        , GameScreen(..)
+        , LevelCreationMode(..)
+        , LevelCreateState
         , ActiveElement(..)
         )
 
@@ -15,14 +17,29 @@ import Game.Resources as Resources exposing (Resources)
 
 type alias Model =
     { canvasSize : Vector
-    , player : Player
+    , touchLocations : List Vector
+    , gameScreen : GameScreen
+    }
+
+
+type GameScreen
+    = Uninitialized
+    | LevelCreateScreen LevelCreateState
+
+
+type alias LevelCreateState =
+    { player : Player
     , barrels : List Barrel
     , camera : Camera
     , resources : Resources
-    , touchLocations : List Vector
-    , gameScreen : GameScreens
+    , levelCreationMode : LevelCreationMode
     , debug : String
     }
+
+
+type LevelCreationMode
+    = PlayTest
+    | LevelEdit
 
 
 type alias Player =
@@ -37,11 +54,6 @@ type alias Barrel =
     , angle : Float
     , collisionRadius : Int
     }
-
-
-type GameScreens
-    = PlayTest
-    | LevelEdit
 
 
 type ActiveElement

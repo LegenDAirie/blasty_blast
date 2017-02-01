@@ -13,8 +13,8 @@ type alias DeltaTime =
     Float
 
 
-updatePlayer : DeltaTime -> ActiveElement -> Player -> Player
-updatePlayer dt activeElement player =
+updatePlayer : DeltaTime -> ActiveElement -> List Vector -> Player -> Player
+updatePlayer dt activeElement touchLocations player =
     let
         gravitationalForce =
             V2.scale dt gravity

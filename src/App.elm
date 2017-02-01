@@ -13,26 +13,34 @@ import Window
 import Task
 import Dict exposing (values)
 import Player exposing (updatePlayer, fireFromBarrel)
-import GameTypes exposing (Model, Barrel, Player, Vector, DeltaTime, GameScreens(..), ActiveElement(..))
+import GameTypes exposing (GameScreen(..), LevelCreateState, Model, Barrel, Player, Vector, DeltaTime, LevelCreationMode(..), ActiveElement(..))
 import GameLogic exposing (calculateActiveElement)
 import Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
 import Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits, gameSize)
-import Controls exposing (calculateButtonsPressed)
+
+
+-- import Controls exposing (calculateButtonsPressed)
 
 
 initialModel : Model
 initialModel =
+    { canvasSize = ( 0, 0 )
+    , touchLocations = []
+    , gameScreen = LevelCreateScreen initialLevelCreateState
+    }
+
+
+initialLevelCreateState : LevelCreateState
+initialLevelCreateState =
     let
         startingPoint =
             ( 0, 0 )
     in
-        { canvasSize = ( 0, 0 )
-        , player = Player startingPoint ( 0, 0 ) 45
+        { player = Player startingPoint ( 0, 0 ) 45
         , barrels = [ Barrel ( 0, -100 ) (3 * pi / 4) 45, Barrel ( 200, -100 ) (pi / 4) 45 ]
         , camera = Camera.fixedWidth (getX gameSize) startingPoint
         , resources = Resources.init
-        , touchLocations = []
-        , gameScreen = PlayTest
+        , levelCreationMode = PlayTest
         , debug = ""
         }
 
@@ -46,8 +54,7 @@ init =
 
 
 type Msg
-    = NoOp
-    | SetCanvasSize Window.Size
+    = SetCanvasSize Window.Size
     | Tick DeltaTime
     | MultiTouchMsg MultiTouch
     | Resources Resources.Msg
@@ -56,15 +63,8 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            model ! []
-
         SetCanvasSize size ->
             { model | canvasSize = setCanvasSize size }
-                ! []
-
-        Resources msg ->
-            { model | resources = Resources.update msg model.resources }
                 ! []
 
         MultiTouchMsg multiTouch ->
@@ -76,40 +76,62 @@ update msg model =
             }
                 ! []
 
-        Tick deltaTime ->
-            let
-                buttonsPressed =
-                    calculateButtonsPressed model.gameScreen model.touchLocations
+        Resources msg ->
+            case model.gameScreen of
+                Uninitialized ->
+                    model ! []
 
-                activeElement =
-                    calculateActiveElement model.player model.barrels
-            in
-                { model
-                    | player = updatePlayer deltaTime activeElement model.player
-                    , camera = Camera.follow 0.5 0.17 (V2.sub model.player.location ( -100, -100 )) model.camera
-                }
-                    ! []
+                LevelCreateScreen state ->
+                    { model
+                        | gameScreen =
+                            LevelCreateScreen { state | resources = Resources.update msg state.resources }
+                    }
+                        ! []
+
+        Tick deltaTime ->
+            case model.gameScreen of
+                Uninitialized ->
+                    model ! []
+
+                LevelCreateScreen state ->
+                    let
+                        activeElement =
+                            calculateActiveElement state.player state.barrels
+                    in
+                        { model
+                            | gameScreen =
+                                LevelCreateScreen
+                                    { state
+                                        | player = updatePlayer deltaTime activeElement model.touchLocations state.player
+                                        , camera = Camera.follow 0.5 0.17 (V2.sub state.player.location ( -100, -100 )) state.camera
+                                    }
+                        }
+                            ! []
 
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ Game.renderCenteredWithOptions
-            []
-            (onAllTouch
-                ++ [ style [ ( "border", "solid 1px black" ) ] ]
-            )
-            { time = 0
-            , size = ( floor <| getX model.canvasSize, floor <| getY model.canvasSize )
-            , camera = model.camera
-            }
-            (render model)
-          -- test touch
-          -- , div
-          --     [ style [ ( "font-size", "72px" ), ( "position", "relative" ), ( "top", "-100" ), ( "left", "-100" ) ]
-          --     ]
-          --     [ Html.text <| toString <| model.touchLocations ]
-        ]
+    let
+        ( camera, gameScene ) =
+            render model
+    in
+        div []
+            [ Game.renderCenteredWithOptions
+                []
+                (onAllTouch
+                    ++ [ style [ ( "border", "solid 1px black" ) ] ]
+                )
+                { time = 0
+                , size = ( floor <| getX model.canvasSize, floor <| getY model.canvasSize )
+                , camera = camera
+                }
+                gameScene
+              -- test touch
+              -- , div
+              --     [ style [ ( "font-size", "72px" ), ( "position", "relative" ), ( "top", "-100" ), ( "left", "-100" ) ]
+              --     ]
+              --     [ Html.text <| toString <| model.touchLocations ]
+            ]
 
 
 setCanvasSize : Window.Size -> ( Float, Float )

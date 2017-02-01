@@ -2,42 +2,49 @@ module Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
 
 import Game.TwoD.Render as Render exposing (Renderable)
 import Game.TwoD.Camera as Camera exposing (Camera, getPosition, getViewSize)
-import GameTypes exposing (Model, Vector, Player, Barrel, GameScreens(..))
+import GameTypes exposing (GameScreen(..), LevelCreateState, Model, Vector, Player, Barrel, LevelCreationMode(..))
 import Game.Resources as Resources exposing (Resources)
 import Vector2 as V2 exposing (getX, getY)
 import Color
 import Coordinates exposing (convertTouchCoorToGameCoor, gameSize)
 
 
-render : Model -> List Renderable
+render : Model -> ( Camera, List Renderable )
 render model =
-    let
-        overlay =
-            case model.gameScreen of
-                PlayTest ->
-                    renderPlayTestOverlay model
+    case model.gameScreen of
+        Uninitialized ->
+            ( Camera.fixedWidth (getX gameSize) ( 0, 0 ), [] )
 
-                LevelEdit ->
-                    renderEditModeOverlay model
-    in
-        List.concat
-            [ [ renderPlayer model.resources model.player ]
-            , (List.map renderBarrel model.barrels)
-            , List.map (renderTouch model.camera) model.touchLocations
-            , overlay
-            ]
+        LevelCreateScreen state ->
+            let
+                overlay =
+                    case state.levelCreationMode of
+                        PlayTest ->
+                            renderPlayTestOverlay state
+
+                        LevelEdit ->
+                            renderEditModeOverlay state
+            in
+                ( state.camera
+                , List.concat
+                    [ [ renderPlayer state.resources state.player ]
+                    , (List.map renderBarrel state.barrels)
+                    , List.map (renderTouch state.camera) model.touchLocations
+                    , overlay
+                    ]
+                )
 
 
-renderPlayTestOverlay : Model -> List Renderable
-renderPlayTestOverlay model =
-    [ renderEditMode model.camera ]
+renderPlayTestOverlay : LevelCreateState -> List Renderable
+renderPlayTestOverlay state =
+    [ renderEditMode state.camera ]
 
 
-renderEditModeOverlay : Model -> List Renderable
-renderEditModeOverlay model =
-    [ renderAddBarrel model.camera
-    , renderEditHudBar model.camera
-    , renderPlayTestMode model.camera
+renderEditModeOverlay : LevelCreateState -> List Renderable
+renderEditModeOverlay state =
+    [ renderAddBarrel state.camera
+    , renderEditHudBar state.camera
+    , renderPlayTestMode state.camera
     ]
 
 
