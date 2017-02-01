@@ -94,19 +94,23 @@ update msg model =
                     model ! []
 
                 LevelCreateScreen state ->
-                    let
-                        activeElement =
-                            calculateActiveElement state.player state.barrels
-                    in
-                        { model
-                            | gameScreen =
-                                LevelCreateScreen
-                                    { state
-                                        | player = updatePlayer deltaTime activeElement model.touchLocations state.player
-                                        , camera = Camera.follow 0.5 0.17 (V2.sub state.player.location ( -100, -100 )) state.camera
-                                    }
-                        }
-                            ! []
+                    { model
+                        | gameScreen = levelCreateScreenUpdate deltaTime model.touchLocations state
+                    }
+                        ! []
+
+
+levelCreateScreenUpdate : DeltaTime -> List Vector -> LevelCreateState -> GameScreen
+levelCreateScreenUpdate deltaTime touchLocations state =
+    let
+        activeElement =
+            calculateActiveElement state.player state.barrels
+    in
+        LevelCreateScreen
+            { state
+                | player = updatePlayer deltaTime activeElement touchLocations state.player
+                , camera = Camera.follow 0.5 0.17 (V2.sub state.player.location ( -100, -100 )) state.camera
+            }
 
 
 view : Model -> Html Msg
