@@ -30,6 +30,7 @@ type GameScreen
 type alias LevelCreateState =
     { player : Player
     , barrels : List Barrel
+    , activeElement : ActiveElement
     , camera : Camera
     , resources : Resources
     , levelCreationMode : LevelCreationMode

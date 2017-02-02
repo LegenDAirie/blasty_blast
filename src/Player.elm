@@ -13,11 +13,28 @@ type alias DeltaTime =
     Float
 
 
-updatePlayer : DeltaTime -> ActiveElement -> List Vector -> Player -> Player
-updatePlayer dt activeElement touchLocations player =
+updatePlayer : DeltaTime -> ActiveElement -> List Vector -> Player -> ( ActiveElement, Player )
+updatePlayer deltaTime activeElement touchLocations player =
+    let
+        ( newActiveElement, controllerForce, firedPlayer ) =
+            applyControles touchLocations activeElement player
+
+        newPlayer =
+            applyPhysics deltaTime newActiveElement controllerForce firedPlayer
+    in
+        ( newActiveElement, newPlayer )
+
+
+applyControles : List Vector -> ActiveElement -> Player -> ( ActiveElement, Vector, Player )
+applyControles touchLocations activeElement player =
+    ( activeElement, ( 0, 0 ), player )
+
+
+applyPhysics : DeltaTime -> ActiveElement -> Vector -> Player -> Player
+applyPhysics deltaTime activeElement controllerForce player =
     let
         gravitationalForce =
-            V2.scale dt gravity
+            V2.scale deltaTime gravity
 
         -- currentControllerForce =
         --     V2.scale dt <|
@@ -43,19 +60,22 @@ updatePlayer dt activeElement touchLocations player =
             newVelocity
                 |> V2.add player.location
                 |> resetPlayerToOrigin
-    in
-        case activeElement of
-            ThePlayer ->
-                { player
-                    | location = newLocation
-                    , velocity = newVelocity
-                }
 
-            ThisBarrel barrel ->
-                { player
-                    | location = barrel.location
-                    , velocity = ( 0, 0 )
-                }
+        newPlayer =
+            case activeElement of
+                ThePlayer ->
+                    { player
+                        | location = newLocation
+                        , velocity = newVelocity
+                    }
+
+                ThisBarrel barrel ->
+                    { player
+                        | location = barrel.location
+                        , velocity = ( 0, 0 )
+                    }
+    in
+        newPlayer
 
 
 resetPlayerToOrigin : Vector -> Vector
@@ -66,8 +86,8 @@ resetPlayerToOrigin location =
         location
 
 
-fire : ActiveElement -> Player -> Player
-fire activeElement player =
+fire : List Vector -> ActiveElement -> Player -> Player
+fire touchLocations activeElement player =
     case activeElement of
         ThePlayer ->
             player

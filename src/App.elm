@@ -38,6 +38,7 @@ initialLevelCreateState =
     in
         { player = Player startingPoint ( 0, 0 ) 45
         , barrels = [ Barrel ( 0, -100 ) (3 * pi / 4) 45, Barrel ( 200, -100 ) (pi / 4) 45 ]
+        , activeElement = ThePlayer
         , camera = Camera.fixedWidth (getX gameSize) startingPoint
         , resources = Resources.init
         , levelCreationMode = PlayTest
@@ -105,11 +106,15 @@ levelCreateScreenUpdate deltaTime touchLocations state =
     let
         activeElement =
             calculateActiveElement state.player state.barrels
+
+        ( newActiveElement, newPlayer ) =
+            updatePlayer deltaTime activeElement touchLocations state.player
     in
         LevelCreateScreen
             { state
-                | player = updatePlayer deltaTime activeElement touchLocations state.player
+                | player = newPlayer
                 , camera = Camera.follow 0.5 0.17 (V2.sub state.player.location ( -100, -100 )) state.camera
+                , activeElement = newActiveElement
             }
 
 
