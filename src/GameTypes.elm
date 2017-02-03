@@ -68,3 +68,32 @@ type alias Vector =
 
 type alias DeltaTime =
     Float
+
+
+
+-- '
+-- type GameControls
+--     = MenuControls
+--     | LevelEditMode
+--
+-- type LevelEditMode
+--     = PlayTestControls
+--     | EditLevelControls
+--
+-- type PlayTestControls
+--     = Right
+--     | Left
+--     | Jump
+--     | SwitchToEditingMode
+--
+-- type EditLevelControls
+--     = PlaceNewBlock
+--     | PlaceNewEnemy
+--     | SwitchToPlayTestMode
+-- '
+--
+--
+--
+--
+--
+--

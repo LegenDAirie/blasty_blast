@@ -17,9 +17,7 @@ import GameTypes exposing (GameScreen(..), LevelCreateState, Model, Barrel, Play
 import GameLogic exposing (calculateActiveElement)
 import Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
 import Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits, gameSize)
-
-
--- import Controls exposing (calculateButtonsPressed)
+import Controls exposing (calculatePlayTestControls)
 
 
 initialModel : Model
@@ -104,11 +102,14 @@ update msg model =
 levelCreateScreenUpdate : DeltaTime -> List Vector -> LevelCreateState -> GameScreen
 levelCreateScreenUpdate deltaTime touchLocations state =
     let
+        pressedButtons =
+            calculatePlayTestControls touchLocations
+
         activeElement =
             calculateActiveElement state.player state.barrels
 
         ( newActiveElement, newPlayer ) =
-            updatePlayer deltaTime activeElement touchLocations state.player
+            updatePlayer deltaTime activeElement pressedButtons state.player
     in
         LevelCreateScreen
             { state

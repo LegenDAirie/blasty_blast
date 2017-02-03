@@ -1,44 +1,49 @@
-module Controls exposing (PlayTestControls(..), calculateButtonsPressed)
+module Controls exposing (PlayTestButton(..), calculatePlayTestControls)
 
-import GameTypes exposing (Vector, GameScreens(..))
-
-
-type GameControls
-    = PlayTestControls
-    | LevelEditControls
+import GameTypes exposing (Vector)
 
 
-type LevelEditControls
-    = AddBarrel
-    | PlayTestMode
+-- type GameControls
+--     = PlayTestControls
+--     | LevelEditControls
+--
+--
+-- type LevelEditControls
+--     = AddBarrel
+--     | PlayTestMode
+--
+--
+-- type PlayTestControls
+--     = DPad Direction
+--     | Fire
+--     | EditMode
+--
+--
+-- type Direction
+--     = Left
+--     | Right
 
 
-type PlayTestControls
-    = DPad Direction
-    | Fire
-    | EditMode
-
-
-type Direction
+type PlayTestButton
     = Left
     | Right
-
-
-calculateButtonsPressed : GameScreens -> List Vector -> List GameControls
-calculateButtonsPressed gameScreen touchLocations =
-    List.filterMap (convertTouchToButton gameScreen) touchLocations
+    | Fire
 
 
 
--- |> List.filterMap (\item -> item /= Nothing)
-
-
-convertTouchToButton : GameScreens -> Vector -> Maybe GameControls
-convertTouchToButton gameScreen touchLocation =
-    Just PlayTestControls
-
-
-
+-- calculateButtonsPressed : List Vector -> List PlayTestButton
+-- calculateButtonsPressed touchLocations =
+--     List.filterMap convertTouchToButton touchLocations
+-- convertTouchToButton : Vector -> Maybe PlayTestButton
+-- convertTouchToButton ( touchX, touchY ) =
+--     if touchX < 320 then
+--         Just Left
+--     else if touchX > 320 && touchX < 960 then
+--         Just Fire
+--     else if touchX > 960 then
+--         Just Left
+--     else
+--         Nothing
 -- case gameScreen of
 --     PlayTest ->
 --         calculatePlayTestControls touchLocation
@@ -47,17 +52,18 @@ convertTouchToButton gameScreen touchLocation =
 --         calculatePlayTestControls touchLocation
 
 
-calculatePlayTestControls : Vector -> Maybe PlayTestControls
-calculatePlayTestControls ( x, y ) =
-    Just Fire
+calculatePlayTestControls : List Vector -> List PlayTestButton
+calculatePlayTestControls touchLocations =
+    List.filterMap calculatePlayTestControl touchLocations
 
 
-
--- if x < 320 then
---     Just (DPad Left)
--- else if x >= 320 && x < 960 then
---     Just Fire
--- else if x > 960 then
---     Just (DPad Right)
--- else
---     Nothing
+calculatePlayTestControl : Vector -> Maybe PlayTestButton
+calculatePlayTestControl ( touchX, touchY ) =
+    if touchX < 320 then
+        Just Left
+    else if touchX > 320 && touchX < 960 then
+        Just Fire
+    else if touchX > 960 then
+        Just Right
+    else
+        Nothing

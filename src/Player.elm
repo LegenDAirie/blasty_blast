@@ -1,58 +1,46 @@
 module Player exposing (updatePlayer, fireFromBarrel)
 
 import Vector2 as V2
-import GameTypes exposing (ActiveElement(..), Player, Barrel)
+import GameTypes exposing (ActiveElement(..), Vector, DeltaTime, Player, Barrel)
+import Controls exposing (PlayTestButton(..))
 import Forces exposing (gravity, controllerLeftForce, controllerRightForce, speedCap, resistance, blastForce)
 
 
-type alias Vector =
-    ( Float, Float )
-
-
-type alias DeltaTime =
-    Float
-
-
-updatePlayer : DeltaTime -> ActiveElement -> List Vector -> Player -> ( ActiveElement, Player )
-updatePlayer deltaTime activeElement touchLocations player =
+updatePlayer : DeltaTime -> ActiveElement -> List PlayTestButton -> Player -> ( ActiveElement, Player )
+updatePlayer deltaTime activeElement playTestButtons player =
     let
-        ( newActiveElement, controllerForce, firedPlayer ) =
-            applyControles touchLocations activeElement player
-
         newPlayer =
-            applyPhysics deltaTime newActiveElement controllerForce firedPlayer
+            applyPhysics deltaTime activeElement playTestButtons player
+
+        ( newActiveElement, firedPlayer ) =
+            if List.member Fire playTestButtons then
+                ( ThePlayer, fire activeElement newPlayer )
+            else
+                ( activeElement, newPlayer )
     in
-        ( newActiveElement, newPlayer )
+        ( newActiveElement, firedPlayer )
 
 
-applyControles : List Vector -> ActiveElement -> Player -> ( ActiveElement, Vector, Player )
-applyControles touchLocations activeElement player =
-    ( activeElement, ( 0, 0 ), player )
-
-
-applyPhysics : DeltaTime -> ActiveElement -> Vector -> Player -> Player
-applyPhysics deltaTime activeElement controllerForce player =
+applyPhysics : DeltaTime -> ActiveElement -> List PlayTestButton -> Player -> Player
+applyPhysics deltaTime activeElement playTestButtons player =
     let
         gravitationalForce =
             V2.scale deltaTime gravity
 
-        -- currentControllerForce =
-        --     V2.scale dt <|
-        --         case moveDirection of
-        --             GoLeft ->
-        --                 controllerLeftForce
-        --
-        --             GoRight ->
-        --                 controllerRightForce
-        --
-        --             GoWithTheFlow ->
-        --                 ( 0, 0 )
+        currentControllerForce =
+            V2.scale deltaTime <|
+                if List.member Left playTestButtons then
+                    controllerLeftForce
+                else if List.member Right playTestButtons then
+                    controllerRightForce
+                else
+                    ( 0, 0 )
+
         newVelocity =
             player.velocity
                 |> V2.add gravitationalForce
-                -- |> V2.add currentControllerForce
-                |>
-                    (\( x, y ) -> ( x * resistance, y ))
+                |> V2.add currentControllerForce
+                |> (\( x, y ) -> ( x * resistance, y ))
                 |> capHorizontalVelocity speedCap
                 |> capVerticalVelocity speedCap
 
@@ -86,8 +74,8 @@ resetPlayerToOrigin location =
         location
 
 
-fire : List Vector -> ActiveElement -> Player -> Player
-fire touchLocations activeElement player =
+fire : ActiveElement -> Player -> Player
+fire activeElement player =
     case activeElement of
         ThePlayer ->
             player
