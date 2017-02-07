@@ -1,10 +1,6 @@
 module Forces exposing (gravity, controllerLeftForce, controllerRightForce, speedCap, resistance, blastForce)
 
-import GameTypes exposing (ActiveElement(..), Barrel, Model, Vector)
-import Barrel exposing (updateBarrel)
-
-
--- import Controls exposing (PlayTestControls(..))
+import GameTypes exposing (Vector)
 
 
 speedCap : Float
@@ -35,41 +31,3 @@ controllerLeftForce =
 controllerRightForce : Vector
 controllerRightForce =
     ( 50, 0 )
-
-
-
--- moveLeft : ActiveElement -> Model -> Model
--- moveLeft activeElement model =
---     case activeElement of
---         ThePlayer ->
---             model
---
---         ThisBarrel barrel ->
---             let
---                 transformBarrel =
---                     Barrel.rotate (pi / 4)
---             in
---                 { model
---                     | barrels = updateBarrel transformBarrel model.barrels barrel
---                 }
---
---
--- moveRight : ActiveElement -> Model -> Model
--- moveRight activeElement model =
---     case activeElement of
---         ThePlayer ->
---             model
---
---         ThisBarrel barrel ->
---             let
---                 transformBarrel =
---                     Barrel.rotate (-pi / 4)
---             in
---                 { model
---                     | barrels = updateBarrel transformBarrel model.barrels barrel
---                 }
---
---
--- dontMove : Model -> Model
--- dontMove model =
---     model

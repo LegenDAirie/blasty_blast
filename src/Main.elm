@@ -1,7 +1,6 @@
 module Main exposing (..)
 
 import App exposing (..)
-import GameTypes exposing (Model)
 import Html exposing (program)
 
 

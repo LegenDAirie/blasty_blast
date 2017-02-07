@@ -12,12 +12,28 @@ import AnimationFrame
 import Window
 import Task
 import Dict exposing (values)
-import Player exposing (updatePlayer, fireFromBarrel)
-import GameTypes exposing (GameScreen(..), LevelCreateState, Model, Barrel, Player, Vector, DeltaTime, LevelCreationMode(..), ActiveElement(..))
-import GameLogic exposing (calculateActiveElement)
-import Draw exposing (render, renderPlayer, renderBarrel, renderTouch)
+import GameTypes exposing (Barrel, Player, Vector, DeltaTime, ActiveElement(..))
 import Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits, gameSize)
-import Controls exposing (calculatePlayTestControls)
+import Screens.LevelCreationScreen exposing (initialLevelCreateState, LevelCreationMode(..), levelCreateScreenUpdate, renderLevelCreation, LevelCreateState)
+
+
+type alias Model =
+    { canvasSize : Vector
+    , touchLocations : List Vector
+    , gameScreen : GameScreen
+    }
+
+
+type GameScreen
+    = Uninitialized
+    | LevelCreateScreen LevelCreateState
+
+
+type Msg
+    = SetCanvasSize Window.Size
+    | Tick DeltaTime
+    | MultiTouchMsg MultiTouch
+    | Resources Resources.Msg
 
 
 initialModel : Model
@@ -28,35 +44,12 @@ initialModel =
     }
 
 
-initialLevelCreateState : LevelCreateState
-initialLevelCreateState =
-    let
-        startingPoint =
-            ( 0, 0 )
-    in
-        { player = Player startingPoint ( 0, 0 ) 45
-        , barrels = [ Barrel ( 0, -100 ) (3 * pi / 4) 45, Barrel ( 200, -100 ) (pi / 4) 45 ]
-        , activeElement = ThePlayer
-        , camera = Camera.fixedWidth (getX gameSize) startingPoint
-        , resources = Resources.init
-        , levelCreationMode = PlayTest
-        , debug = ""
-        }
-
-
 init : ( Model, Cmd Msg )
 init =
     initialModel
         ! [ Task.perform SetCanvasSize Window.size
           , Cmd.map Resources <| Resources.loadTextures [ "../assets/ghost-friend.png" ]
           ]
-
-
-type Msg
-    = SetCanvasSize Window.Size
-    | Tick DeltaTime
-    | MultiTouchMsg MultiTouch
-    | Resources Resources.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -94,36 +87,26 @@ update msg model =
 
                 LevelCreateScreen state ->
                     { model
-                        | gameScreen = levelCreateScreenUpdate deltaTime model.touchLocations state
+                        | gameScreen =
+                            LevelCreateScreen <|
+                                levelCreateScreenUpdate
+                                    deltaTime
+                                    model.touchLocations
+                                    state
                     }
                         ! []
-
-
-levelCreateScreenUpdate : DeltaTime -> List Vector -> LevelCreateState -> GameScreen
-levelCreateScreenUpdate deltaTime touchLocations state =
-    let
-        pressedButtons =
-            calculatePlayTestControls touchLocations
-
-        activeElement =
-            calculateActiveElement state.player state.barrels
-
-        ( newActiveElement, newPlayer ) =
-            updatePlayer deltaTime activeElement pressedButtons state.player
-    in
-        LevelCreateScreen
-            { state
-                | player = newPlayer
-                , camera = Camera.follow 0.5 0.17 (V2.sub state.player.location ( -100, -100 )) state.camera
-                , activeElement = newActiveElement
-            }
 
 
 view : Model -> Html Msg
 view model =
     let
         ( camera, gameScene ) =
-            render model
+            case model.gameScreen of
+                Uninitialized ->
+                    ( Camera.fixedWidth (getX gameSize) ( 0, 0 ), [] )
+
+                LevelCreateScreen state ->
+                    renderLevelCreation state
     in
         div []
             [ Game.renderCenteredWithOptions
@@ -136,11 +119,6 @@ view model =
                 , camera = camera
                 }
                 gameScene
-              -- test touch
-              -- , div
-              --     [ style [ ( "font-size", "72px" ), ( "position", "relative" ), ( "top", "-100" ), ( "left", "-100" ) ]
-              --     ]
-              --     [ Html.text <| toString <| model.touchLocations ]
             ]
 
 

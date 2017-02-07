@@ -1,19 +1,47 @@
-module Player exposing (updatePlayer, fireFromBarrel)
+module Player exposing (updatePlayer, renderPlayer)
 
 import Vector2 as V2
+import Game.TwoD.Render as Render exposing (Renderable, rectangle)
+import Game.Resources as Resources exposing (Resources)
+import Color
 import GameTypes exposing (ActiveElement(..), Vector, DeltaTime, Player, Barrel)
-import Controls exposing (PlayTestButton(..))
 import Forces exposing (gravity, controllerLeftForce, controllerRightForce, speedCap, resistance, blastForce)
 
 
-updatePlayer : DeltaTime -> ActiveElement -> List PlayTestButton -> Player -> ( ActiveElement, Player )
-updatePlayer deltaTime activeElement playTestButtons player =
+type PlayerControles
+    = Left
+    | Right
+    | Fire
+
+
+calculateButtonsPressed : List Vector -> List PlayerControles
+calculateButtonsPressed touchLocations =
+    List.filterMap calculateButtonPressed touchLocations
+
+
+calculateButtonPressed : Vector -> Maybe PlayerControles
+calculateButtonPressed ( touchX, touchY ) =
+    if touchX < 320 then
+        Just Left
+    else if touchX > 320 && touchX < 960 then
+        Just Fire
+    else if touchX > 960 then
+        Just Right
+    else
+        Nothing
+
+
+updatePlayer : DeltaTime -> ActiveElement -> List Vector -> Player -> ( ActiveElement, Player )
+updatePlayer deltaTime activeElement touchLocations player =
     let
+        buttonsPressed =
+            calculateButtonsPressed touchLocations
+
         newPlayer =
-            applyPhysics deltaTime activeElement playTestButtons player
+            applyPhysics deltaTime activeElement buttonsPressed player
 
         ( newActiveElement, firedPlayer ) =
-            if List.member Fire playTestButtons then
+            if List.member Fire buttonsPressed then
                 ( ThePlayer, fire activeElement newPlayer )
             else
                 ( activeElement, newPlayer )
@@ -21,7 +49,7 @@ updatePlayer deltaTime activeElement playTestButtons player =
         ( newActiveElement, firedPlayer )
 
 
-applyPhysics : DeltaTime -> ActiveElement -> List PlayTestButton -> Player -> Player
+applyPhysics : DeltaTime -> ActiveElement -> List PlayerControles -> Player -> Player
 applyPhysics deltaTime activeElement playTestButtons player =
     let
         gravitationalForce =
@@ -124,3 +152,27 @@ capVerticalVelocity maxSpeed ( x, y ) =
         ( x, -maxSpeed )
     else
         ( x, y )
+
+
+renderPlayer : Resources -> Player -> Renderable
+renderPlayer resources player =
+    -- let
+    --     ( x, y ) =
+    --         player.location
+    -- in
+    --     Render.animatedSpriteWithOptions
+    --         { position = ( x, y, 0 )
+    --         , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
+    --         , texture = Resources.getTexture "../assets/ghost-friend.png" resources
+    --         , bottomLeft = ( 0, 0 )
+    --         , topRight = ( 1, 1 )
+    --         , duration = 1
+    --         , numberOfFrames = 8
+    --         , rotation = 0
+    --         , pivot = ( 0.5, 0 )
+    --         }
+    Render.rectangle
+        { color = Color.charcoal
+        , position = player.location
+        , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
+        }

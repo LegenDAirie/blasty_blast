@@ -1,5 +1,8 @@
-module Barrel exposing (updateBarrel, rotate)
+module Barrel exposing (updateBarrel, renderBarrel)
 
+import Game.TwoD.Render as Render exposing (Renderable)
+import Vector2 as V2 exposing (getX, getY)
+import Color
 import GameTypes exposing (Vector, Barrel)
 
 
@@ -36,3 +39,14 @@ rotate offsetAngle barrel =
     { barrel
         | angle = barrel.angle + offsetAngle
     }
+
+
+renderBarrel : Barrel -> Renderable
+renderBarrel barrel =
+    Render.rectangleWithOptions
+        { color = Color.brown
+        , position = ( getX barrel.location, getY barrel.location, 0 )
+        , rotation = barrel.angle
+        , size = ( toFloat barrel.collisionRadius * 2, toFloat barrel.collisionRadius * 2 )
+        , pivot = ( 0.5, 0.5 )
+        }

@@ -2,7 +2,7 @@ module Coordinates exposing (convertTouchCoorToGameCoor, convertToGameUnits, gam
 
 import GameTypes exposing (Vector)
 import Vector2 as V2 exposing (distance, normalize, setX, getX, getY)
-import Game.TwoD.Camera as Camera exposing (Camera, getViewSize, getPosition)
+import Game.TwoD.Camera as Camera exposing (Camera, getPosition)
 
 
 gameSize : Vector
