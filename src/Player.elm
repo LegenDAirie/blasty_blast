@@ -1,4 +1,4 @@
-module Player exposing (updatePlayer, renderPlayer)
+module Player exposing (updatePlayer, renderPlayer, PlayerControls, initialPlayerControls)
 
 import Vector2 as V2
 import Game.TwoD.Render as Render exposing (Renderable, rectangle)
@@ -6,42 +6,43 @@ import Game.Resources as Resources exposing (Resources)
 import Color
 import GameTypes exposing (ActiveElement(..), Vector, DeltaTime, Player, Barrel)
 import Forces exposing (gravity, controllerLeftForce, controllerRightForce, speedCap, resistance, blastForce)
+import Button exposing (ButtonState(..), calculateButtonState)
 
 
-type PlayerControles
-    = Left
-    | Right
-    | Fire
+type alias PlayerControls =
+    { left : ButtonState
+    , right : ButtonState
+    , fire : ButtonState
+    }
 
 
-calculateButtonsPressed : List Vector -> List PlayerControles
-calculateButtonsPressed touchLocations =
-    List.filterMap calculateButtonPressed touchLocations
+initialPlayerControls : PlayerControls
+initialPlayerControls =
+    { left = Inactive
+    , right = Inactive
+    , fire = Inactive
+    }
 
 
-calculateButtonPressed : Vector -> Maybe PlayerControles
-calculateButtonPressed ( touchX, touchY ) =
-    if touchX < 320 then
-        Just Left
-    else if touchX > 320 && touchX < 960 then
-        Just Fire
-    else if touchX > 960 then
-        Just Right
-    else
-        Nothing
+calculateButtonsPressed : List Vector -> PlayerControls -> PlayerControls
+calculateButtonsPressed touchLocations playerControls =
+    { left = calculateButtonState (List.any (\( x, y ) -> x < 320) touchLocations) playerControls.left
+    , right = calculateButtonState (List.any (\( x, y ) -> x > 960) touchLocations) playerControls.right
+    , fire = calculateButtonState (List.any (\( x, y ) -> x > 320 && x < 960) touchLocations) playerControls.fire
+    }
 
 
-updatePlayer : DeltaTime -> ActiveElement -> List Vector -> Player -> ( ActiveElement, Player )
-updatePlayer deltaTime activeElement touchLocations player =
+updatePlayer : DeltaTime -> ActiveElement -> List Vector -> PlayerControls -> Player -> ( ActiveElement, Player )
+updatePlayer deltaTime activeElement touchLocations playerControls player =
     let
         buttonsPressed =
-            calculateButtonsPressed touchLocations
+            calculateButtonsPressed touchLocations playerControls
 
         newPlayer =
             applyPhysics deltaTime activeElement buttonsPressed player
 
         ( newActiveElement, firedPlayer ) =
-            if List.member Fire buttonsPressed then
+            if playerControls.fire == Pressed then
                 ( ThePlayer, fire activeElement newPlayer )
             else
                 ( activeElement, newPlayer )
@@ -49,17 +50,17 @@ updatePlayer deltaTime activeElement touchLocations player =
         ( newActiveElement, firedPlayer )
 
 
-applyPhysics : DeltaTime -> ActiveElement -> List PlayerControles -> Player -> Player
-applyPhysics deltaTime activeElement playTestButtons player =
+applyPhysics : DeltaTime -> ActiveElement -> PlayerControls -> Player -> Player
+applyPhysics deltaTime activeElement playerControls player =
     let
         gravitationalForce =
             V2.scale deltaTime gravity
 
         currentControllerForce =
             V2.scale deltaTime <|
-                if List.member Left playTestButtons then
+                if playerControls.left == Pressed || playerControls.left == Held then
                     controllerLeftForce
-                else if List.member Right playTestButtons then
+                else if playerControls.right == Pressed || playerControls.right == Held then
                     controllerRightForce
                 else
                     ( 0, 0 )

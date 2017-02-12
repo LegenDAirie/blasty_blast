@@ -8,8 +8,9 @@ import Color
 import GameTypes exposing (DeltaTime, Vector, Player, Barrel, ActiveElement(..))
 import Coordinates exposing (gameSize)
 import GameLogic exposing (calculateActiveElement)
-import Player exposing (updatePlayer, renderPlayer)
+import Player exposing (PlayerControls, updatePlayer, renderPlayer, PlayerControls, initialPlayerControls)
 import Barrel exposing (renderBarrel)
+import Button exposing (ButtonState(..), calculateButtonState)
 
 
 type LevelCreationMode
@@ -24,6 +25,32 @@ type alias LevelCreateState =
     , camera : Camera
     , resources : Resources
     , levelCreationMode : LevelCreationMode
+    , editModeButtons : EditModeControls
+    , playTestModeButtons : PlayTestModeControls
+    }
+
+
+type alias EditModeControls =
+    { switchToPlayTestMode : ButtonState
+    }
+
+
+defaultEditModeButtons : EditModeControls
+defaultEditModeButtons =
+    { switchToPlayTestMode = Inactive
+    }
+
+
+type alias PlayTestModeControls =
+    { switchToEditMode : ButtonState
+    , playerControls : PlayerControls
+    }
+
+
+defaultPlayTestModeButtons : PlayTestModeControls
+defaultPlayTestModeButtons =
+    { switchToEditMode = Inactive
+    , playerControls = initialPlayerControls
     }
 
 
@@ -42,27 +69,75 @@ initialLevelCreateState =
         , camera = Camera.fixedWidth gameWidth startingPoint
         , resources = Resources.init
         , levelCreationMode = PlayTest
+        , editModeButtons = defaultEditModeButtons
+        , playTestModeButtons = defaultPlayTestModeButtons
         }
-
-
-type PlayTestButton
-    = SwitchToEditMode
 
 
 levelCreateScreenUpdate : DeltaTime -> List Vector -> LevelCreateState -> LevelCreateState
 levelCreateScreenUpdate deltaTime touchLocations state =
+    case state.levelCreationMode of
+        PlayTest ->
+            updatePlayTestingMode deltaTime touchLocations state
+
+        LevelEdit ->
+            updateLevelEditMode deltaTime touchLocations state
+
+
+updatePlayTestingMode : DeltaTime -> List Vector -> LevelCreateState -> LevelCreateState
+updatePlayTestingMode deltaTime touchLocations state =
     let
+        buttonsPressed =
+            calculatePlayTestButtonsPressed touchLocations state.playTestModeButtons
+
         activeElement =
             calculateActiveElement state.player state.barrels
 
         ( newActiveElement, newPlayer ) =
-            updatePlayer deltaTime activeElement touchLocations state.player
+            updatePlayer deltaTime activeElement touchLocations state.playTestModeButtons.playerControls state.player
+
+        levelCreationMode =
+            if buttonsPressed.switchToEditMode == Pressed then
+                LevelEdit
+            else
+                PlayTest
     in
         { state
             | player = newPlayer
             , camera = Camera.follow 0.5 0.17 (V2.sub state.player.location ( -100, -100 )) state.camera
             , activeElement = newActiveElement
+            , levelCreationMode = levelCreationMode
         }
+
+
+calculatePlayTestButtonsPressed : List Vector -> PlayTestModeControls -> PlayTestModeControls
+calculatePlayTestButtonsPressed touchLocations playTestControls =
+    { playTestControls
+        | switchToEditMode = calculateButtonState (List.any (\( x, y ) -> x < 250 && x > 1000) touchLocations) playTestControls.switchToEditMode
+    }
+
+
+updateLevelEditMode : DeltaTime -> List Vector -> LevelCreateState -> LevelCreateState
+updateLevelEditMode deltaTime touchLocations state =
+    let
+        editModeButtonsPressed =
+            calculateEditModeButtonsPressed touchLocations state.editModeButtons
+
+        levelCreationMode =
+            if editModeButtonsPressed.switchToPlayTestMode == Pressed then
+                PlayTest
+            else
+                LevelEdit
+    in
+        { state
+            | levelCreationMode = levelCreationMode
+        }
+
+
+calculateEditModeButtonsPressed : List Vector -> EditModeControls -> EditModeControls
+calculateEditModeButtonsPressed touchLocations editModeControls =
+    { switchToPlayTestMode = calculateButtonState (List.any (\( x, y ) -> x < 250 && x > 1000) touchLocations) editModeControls.switchToPlayTestMode
+    }
 
 
 renderLevelCreation : LevelCreateState -> ( Camera, List Renderable )
