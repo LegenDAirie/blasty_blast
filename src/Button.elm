@@ -9,10 +9,10 @@ type ButtonState
 
 
 calculateButtonState : Bool -> ButtonState -> ButtonState
-calculateButtonState isTouched buttonState =
+calculateButtonState isTouched currentButtonState =
     case isTouched of
         True ->
-            case buttonState of
+            case currentButtonState of
                 Pressed ->
                     Held
 
@@ -26,7 +26,7 @@ calculateButtonState isTouched buttonState =
                     Pressed
 
         False ->
-            case buttonState of
+            case currentButtonState of
                 Pressed ->
                     Released
 

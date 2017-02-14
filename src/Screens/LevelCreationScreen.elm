@@ -107,13 +107,14 @@ updatePlayTestingMode deltaTime touchLocations state =
             , camera = Camera.follow 0.5 0.17 (V2.sub state.player.location ( -100, -100 )) state.camera
             , activeElement = newActiveElement
             , levelCreationMode = levelCreationMode
+            , playTestModeButtons = buttonsPressed
         }
 
 
 calculatePlayTestButtonsPressed : List Vector -> PlayTestModeControls -> PlayTestModeControls
 calculatePlayTestButtonsPressed touchLocations playTestControls =
     { playTestControls
-        | switchToEditMode = calculateButtonState (List.any (\( x, y ) -> x < 250 && x > 1000) touchLocations) playTestControls.switchToEditMode
+        | switchToEditMode = calculateButtonState (List.any (\( x, y ) -> x < 250 && y > 500) touchLocations) playTestControls.switchToEditMode
     }
 
 
@@ -131,12 +132,13 @@ updateLevelEditMode deltaTime touchLocations state =
     in
         { state
             | levelCreationMode = levelCreationMode
+            , editModeButtons = editModeButtonsPressed
         }
 
 
 calculateEditModeButtonsPressed : List Vector -> EditModeControls -> EditModeControls
 calculateEditModeButtonsPressed touchLocations editModeControls =
-    { switchToPlayTestMode = calculateButtonState (List.any (\( x, y ) -> x < 250 && x > 1000) touchLocations) editModeControls.switchToPlayTestMode
+    { switchToPlayTestMode = calculateButtonState (List.any (\( x, y ) -> x < 250 && y > 500) touchLocations) editModeControls.switchToPlayTestMode
     }
 
 

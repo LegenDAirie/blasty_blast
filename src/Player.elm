@@ -42,7 +42,7 @@ updatePlayer deltaTime activeElement touchLocations playerControls player =
             applyPhysics deltaTime activeElement buttonsPressed player
 
         ( newActiveElement, firedPlayer ) =
-            if playerControls.fire == Pressed then
+            if buttonsPressed.fire == Pressed then
                 ( ThePlayer, fire activeElement newPlayer )
             else
                 ( activeElement, newPlayer )
