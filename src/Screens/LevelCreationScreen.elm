@@ -8,7 +8,7 @@ import Color
 import GameTypes exposing (DeltaTime, Vector, Player, Barrel, ActiveElement(..))
 import Coordinates exposing (gameSize)
 import GameLogic exposing (calculateActiveElement)
-import Player exposing (PlayerControls, updatePlayer, renderPlayer, PlayerControls, initialPlayerControls)
+import Player exposing (PlayerControls, updatePlayer, renderPlayer, PlayerControls, initialPlayerControls, calculatePlayerButtonsPressed)
 import Barrel exposing (renderBarrel)
 import Button exposing (ButtonState(..), calculateButtonState)
 
@@ -27,6 +27,7 @@ type alias LevelCreateState =
     , levelCreationMode : LevelCreationMode
     , editModeButtons : EditModeControls
     , playTestModeButtons : PlayTestModeControls
+    , playerControls : PlayerControls
     }
 
 
@@ -43,14 +44,12 @@ defaultEditModeButtons =
 
 type alias PlayTestModeControls =
     { switchToEditMode : ButtonState
-    , playerControls : PlayerControls
     }
 
 
 defaultPlayTestModeButtons : PlayTestModeControls
 defaultPlayTestModeButtons =
     { switchToEditMode = Inactive
-    , playerControls = initialPlayerControls
     }
 
 
@@ -71,6 +70,7 @@ initialLevelCreateState =
         , levelCreationMode = PlayTest
         , editModeButtons = defaultEditModeButtons
         , playTestModeButtons = defaultPlayTestModeButtons
+        , playerControls = initialPlayerControls
         }
 
 
@@ -87,17 +87,26 @@ levelCreateScreenUpdate deltaTime touchLocations state =
 updatePlayTestingMode : DeltaTime -> List Vector -> LevelCreateState -> LevelCreateState
 updatePlayTestingMode deltaTime touchLocations state =
     let
-        buttonsPressed =
+        playTestModebuttonsPressed =
             calculatePlayTestButtonsPressed touchLocations state.playTestModeButtons
+
+        playerButtonsPressed =
+            calculatePlayerButtonsPressed touchLocations state.playerControls
 
         activeElement =
             calculateActiveElement state.player state.barrels
 
-        ( newActiveElement, newPlayer ) =
-            updatePlayer deltaTime activeElement touchLocations state.playTestModeButtons.playerControls state.player
+        newActiveElement =
+            if playerButtonsPressed.fire == Pressed then
+                ThePlayer
+            else
+                activeElement
+
+        newPlayer =
+            updatePlayer deltaTime activeElement state.playerControls state.player
 
         levelCreationMode =
-            if buttonsPressed.switchToEditMode == Pressed then
+            if playTestModebuttonsPressed.switchToEditMode == Pressed then
                 LevelEdit
             else
                 PlayTest
@@ -107,7 +116,8 @@ updatePlayTestingMode deltaTime touchLocations state =
             , camera = Camera.follow 0.5 0.17 (V2.sub state.player.location ( -100, -100 )) state.camera
             , activeElement = newActiveElement
             , levelCreationMode = levelCreationMode
-            , playTestModeButtons = buttonsPressed
+            , playTestModeButtons = playTestModebuttonsPressed
+            , playerControls = playerButtonsPressed
         }
 
 

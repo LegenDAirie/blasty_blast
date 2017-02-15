@@ -1,4 +1,4 @@
-module Player exposing (updatePlayer, renderPlayer, PlayerControls, initialPlayerControls)
+module Player exposing (updatePlayer, renderPlayer, PlayerControls, initialPlayerControls, calculatePlayerButtonsPressed)
 
 import Vector2 as V2
 import Game.TwoD.Render as Render exposing (Renderable, rectangle)
@@ -24,30 +24,27 @@ initialPlayerControls =
     }
 
 
-calculateButtonsPressed : List Vector -> PlayerControls -> PlayerControls
-calculateButtonsPressed touchLocations playerControls =
+calculatePlayerButtonsPressed : List Vector -> PlayerControls -> PlayerControls
+calculatePlayerButtonsPressed touchLocations playerControls =
     { left = calculateButtonState (List.any (\( x, y ) -> x < 320) touchLocations) playerControls.left
     , right = calculateButtonState (List.any (\( x, y ) -> x > 960) touchLocations) playerControls.right
     , fire = calculateButtonState (List.any (\( x, y ) -> x > 320 && x < 960) touchLocations) playerControls.fire
     }
 
 
-updatePlayer : DeltaTime -> ActiveElement -> List Vector -> PlayerControls -> Player -> ( ActiveElement, Player )
-updatePlayer deltaTime activeElement touchLocations playerControls player =
+updatePlayer : DeltaTime -> ActiveElement -> PlayerControls -> Player -> Player
+updatePlayer deltaTime activeElement buttonsPressed player =
     let
-        buttonsPressed =
-            calculateButtonsPressed touchLocations playerControls
-
         newPlayer =
             applyPhysics deltaTime activeElement buttonsPressed player
 
-        ( newActiveElement, firedPlayer ) =
+        firedPlayer =
             if buttonsPressed.fire == Pressed then
-                ( ThePlayer, fire activeElement newPlayer )
+                fire activeElement newPlayer
             else
-                ( activeElement, newPlayer )
+                newPlayer
     in
-        ( newActiveElement, firedPlayer )
+        firedPlayer
 
 
 applyPhysics : DeltaTime -> ActiveElement -> PlayerControls -> Player -> Player
