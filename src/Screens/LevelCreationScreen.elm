@@ -125,9 +125,14 @@ updatePlayTestingMode deltaTime touchLocations state =
 
 calculatePlayTestButtonsPressed : List Vector -> PlayTestModeControls -> PlayTestModeControls
 calculatePlayTestButtonsPressed touchLocations playTestControls =
-    { playTestControls
-        | switchToEditMode = calculateButtonState (List.any (\( x, y ) -> x < 250 && y > 500) touchLocations) playTestControls.switchToEditMode
-    }
+    let
+        switchToEditModePressed =
+            touchLocations
+                |> List.any (\( x, y ) -> x < 250 && y > 500)
+    in
+        { playTestControls
+            | switchToEditMode = calculateButtonState switchToEditModePressed playTestControls.switchToEditMode
+        }
 
 
 updateLevelEditMode : DeltaTime -> List Vector -> LevelCreateState -> LevelCreateState
@@ -136,8 +141,12 @@ updateLevelEditMode deltaTime touchLocations state =
         editModeButtonsPressed =
             calculateEditModeButtonsPressed touchLocations state.editModeButtons
 
+        touchesInGameCoordinates =
+            touchLocations
+                |> List.map (convertTouchCoorToGameCoor state.camera)
+
         movedBarrels =
-            repostionBarrels (List.map (convertTouchCoorToGameCoor state.camera) touchLocations) state.barrels
+            repostionBarrels touchesInGameCoordinates state.barrels
 
         levelCreationMode =
             if editModeButtonsPressed.switchToPlayTestMode == Pressed then
@@ -154,9 +163,18 @@ updateLevelEditMode deltaTime touchLocations state =
 
 calculateEditModeButtonsPressed : List Vector -> EditModeControls -> EditModeControls
 calculateEditModeButtonsPressed touchLocations editModeControls =
-    { switchToPlayTestMode = calculateButtonState (List.any (\( x, y ) -> x < 250 && y > 500) touchLocations) editModeControls.switchToPlayTestMode
-    , addBarrel = calculateButtonState (List.any (\( x, y ) -> x > 960 && y < 200) touchLocations) editModeControls.addBarrel
-    }
+    let
+        switchToPlayTestModePressed =
+            touchLocations
+                |> List.any (\( x, y ) -> x < 250 && y > 500)
+
+        addBarrelPressed =
+            touchLocations
+                |> List.any (\( x, y ) -> x > 960 && y < 200)
+    in
+        { switchToPlayTestMode = calculateButtonState switchToPlayTestModePressed editModeControls.switchToPlayTestMode
+        , addBarrel = calculateButtonState addBarrelPressed editModeControls.addBarrel
+        }
 
 
 renderLevelCreation : LevelCreateState -> ( Camera, List Renderable )
