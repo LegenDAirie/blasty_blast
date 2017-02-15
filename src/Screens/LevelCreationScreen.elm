@@ -6,8 +6,8 @@ import Game.Resources as Resources exposing (Resources)
 import Vector2 as V2
 import Color
 import GameTypes exposing (DeltaTime, Vector, Player, Barrel, ActiveElement(..))
-import Coordinates exposing (gameSize)
-import GameLogic exposing (calculateActiveElement)
+import Coordinates exposing (gameSize, convertTouchCoorToGameCoor)
+import GameLogic exposing (calculateActivePlayElement, repostionBarrels)
 import Player exposing (PlayerControls, updatePlayer, renderPlayer, PlayerControls, initialPlayerControls, calculatePlayerButtonsPressed)
 import Barrel exposing (renderBarrel)
 import Button exposing (ButtonState(..), calculateButtonState)
@@ -33,12 +33,14 @@ type alias LevelCreateState =
 
 type alias EditModeControls =
     { switchToPlayTestMode : ButtonState
+    , addBarrel : ButtonState
     }
 
 
 defaultEditModeButtons : EditModeControls
 defaultEditModeButtons =
     { switchToPlayTestMode = Inactive
+    , addBarrel = Inactive
     }
 
 
@@ -94,7 +96,7 @@ updatePlayTestingMode deltaTime touchLocations state =
             calculatePlayerButtonsPressed touchLocations state.playerControls
 
         activeElement =
-            calculateActiveElement state.player state.barrels
+            calculateActivePlayElement state.player state.barrels
 
         newActiveElement =
             if playerButtonsPressed.fire == Pressed then
@@ -134,6 +136,9 @@ updateLevelEditMode deltaTime touchLocations state =
         editModeButtonsPressed =
             calculateEditModeButtonsPressed touchLocations state.editModeButtons
 
+        movedBarrels =
+            repostionBarrels (List.map (convertTouchCoorToGameCoor state.camera) touchLocations) state.barrels
+
         levelCreationMode =
             if editModeButtonsPressed.switchToPlayTestMode == Pressed then
                 PlayTest
@@ -143,12 +148,14 @@ updateLevelEditMode deltaTime touchLocations state =
         { state
             | levelCreationMode = levelCreationMode
             , editModeButtons = editModeButtonsPressed
+            , barrels = movedBarrels
         }
 
 
 calculateEditModeButtonsPressed : List Vector -> EditModeControls -> EditModeControls
 calculateEditModeButtonsPressed touchLocations editModeControls =
     { switchToPlayTestMode = calculateButtonState (List.any (\( x, y ) -> x < 250 && y > 500) touchLocations) editModeControls.switchToPlayTestMode
+    , addBarrel = calculateButtonState (List.any (\( x, y ) -> x > 960 && y < 200) touchLocations) editModeControls.addBarrel
     }
 
 
