@@ -33,14 +33,14 @@ type alias LevelCreateState =
 
 type alias EditModeControls =
     { switchToPlayTestMode : ButtonState
-    , addBarrel : ButtonState
+    , addBarrelButton : ButtonState
     }
 
 
 defaultEditModeButtons : EditModeControls
 defaultEditModeButtons =
     { switchToPlayTestMode = Inactive
-    , addBarrel = Inactive
+    , addBarrelButton = Inactive
     }
 
 
@@ -146,7 +146,9 @@ updateLevelEditMode deltaTime touchLocations state =
                 |> List.map (convertTouchCoorToGameCoor state.camera)
 
         movedBarrels =
-            repostionBarrels touchesInGameCoordinates state.barrels
+            state.barrels
+                |> addBarrel editModeButtonsPressed.addBarrelButton state.camera
+                |> repostionBarrels touchesInGameCoordinates
 
         levelCreationMode =
             if editModeButtonsPressed.switchToPlayTestMode == Pressed then
@@ -173,8 +175,26 @@ calculateEditModeButtonsPressed touchLocations editModeControls =
                 |> List.any (\( x, y ) -> x > 960 && y < 200)
     in
         { switchToPlayTestMode = calculateButtonState switchToPlayTestModePressed editModeControls.switchToPlayTestMode
-        , addBarrel = calculateButtonState addBarrelPressed editModeControls.addBarrel
+        , addBarrelButton = calculateButtonState addBarrelPressed editModeControls.addBarrelButton
         }
+
+
+addBarrel : ButtonState -> Camera -> List Barrel -> List Barrel
+addBarrel buttonPressed camera barrels =
+    case buttonPressed of
+        Pressed ->
+            let
+                newBarrelLocation =
+                    ( 1120, 100 )
+                        |> convertTouchCoorToGameCoor camera
+
+                newBarrel =
+                    Barrel newBarrelLocation 0 45
+            in
+                newBarrel :: barrels
+
+        _ ->
+            barrels
 
 
 renderLevelCreation : LevelCreateState -> ( Camera, List Renderable )
