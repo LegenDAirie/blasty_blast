@@ -1,6 +1,6 @@
 module Player exposing (updatePlayer, renderPlayer, PlayerControls, initialPlayerControls, calculatePlayerButtonsPressed)
 
-import Vector2 as V2
+import Vector2 as V2 exposing (getX, getY)
 import Game.TwoD.Render as Render exposing (Renderable, rectangle)
 import Game.Resources as Resources exposing (Resources)
 import Color
@@ -169,8 +169,15 @@ renderPlayer resources player =
     --         , rotation = 0
     --         , pivot = ( 0.5, 0 )
     --         }
-    Render.rectangle
-        { color = Color.charcoal
-        , position = player.location
-        , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
-        }
+    let
+        x =
+            getX player.location - toFloat player.collisionRadius
+
+        y =
+            getY player.location - toFloat player.collisionRadius
+    in
+        Render.rectangle
+            { color = Color.charcoal
+            , position = ( x, y )
+            , size = ( toFloat player.collisionRadius * 2, toFloat player.collisionRadius * 2 )
+            }

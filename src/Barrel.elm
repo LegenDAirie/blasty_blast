@@ -43,10 +43,17 @@ rotate offsetAngle barrel =
 
 renderBarrel : Barrel -> Renderable
 renderBarrel barrel =
-    Render.rectangleWithOptions
-        { color = Color.brown
-        , position = ( getX barrel.location, getY barrel.location, 0 )
-        , rotation = barrel.angle
-        , size = ( toFloat barrel.collisionRadius * 2, toFloat barrel.collisionRadius * 2 )
-        , pivot = ( 0.5, 0.5 )
-        }
+    let
+        x =
+            getX barrel.location - toFloat barrel.collisionRadius
+
+        y =
+            getY barrel.location - toFloat barrel.collisionRadius
+    in
+        Render.rectangleWithOptions
+            { color = Color.brown
+            , position = ( x, y, 0 )
+            , rotation = barrel.angle
+            , size = ( toFloat barrel.collisionRadius * 2, toFloat barrel.collisionRadius * 2 )
+            , pivot = ( 0.5, 0.5 )
+            }

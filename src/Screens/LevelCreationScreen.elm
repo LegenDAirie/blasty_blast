@@ -3,7 +3,7 @@ module Screens.LevelCreationScreen exposing (..)
 import Game.TwoD.Render as Render exposing (Renderable)
 import Game.TwoD.Camera as Camera exposing (Camera, getPosition)
 import Game.Resources as Resources exposing (Resources)
-import Vector2 as V2
+import Vector2 as V2 exposing (getX, getY)
 import Color
 import GameTypes exposing (DeltaTime, Vector, Player, Barrel, ActiveElement(..))
 import Coordinates exposing (gameSize, convertTouchCoorToGameCoor)
@@ -65,7 +65,7 @@ initialLevelCreateState =
             gameSize
     in
         { player = Player startingPoint ( 0, 0 ) 45
-        , barrels = [ Barrel ( 0, -100 ) (3 * pi / 4) 45, Barrel ( 200, -100 ) (pi / 4) 45 ]
+        , barrels = [ Barrel ( 0, -100 ) (pi / 2) 45, Barrel ( 200, -100 ) (pi / 2) 45 ]
         , activeElement = ThePlayer
         , camera = Camera.fixedWidth gameWidth startingPoint
         , resources = Resources.init
