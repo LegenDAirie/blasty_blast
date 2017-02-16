@@ -1,7 +1,8 @@
-module GameLogic exposing (calculateActivePlayElement, repostionBarrels)
+module GameLogic exposing (calculateActivePlayElement, repostionBarrels, removeOverlappingBarrels)
 
 import Vector2 as V2 exposing (distance)
 import GameTypes exposing (Vector, Player, Barrel, ActiveElement(..))
+import Set
 
 
 calculateActivePlayElement : Player -> List Barrel -> ActiveElement
@@ -56,3 +57,17 @@ repositionBarrel touchLocation barrel =
             }
         else
             barrel
+
+
+removeOverlappingBarrels : List Barrel -> List Barrel
+removeOverlappingBarrels list =
+    let
+        step next ( set, acc ) =
+            if Set.member next.location set then
+                ( set, acc )
+            else
+                ( Set.insert next.location set, next :: acc )
+    in
+        List.foldl step ( Set.empty, [] ) list
+            |> (\( first, second ) -> second)
+            |> List.reverse

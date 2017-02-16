@@ -7,7 +7,7 @@ import Vector2 as V2
 import Color
 import GameTypes exposing (DeltaTime, Vector, Player, Barrel, ActiveElement(..))
 import Coordinates exposing (gameSize, convertTouchCoorToGameCoor)
-import GameLogic exposing (calculateActivePlayElement, repostionBarrels)
+import GameLogic exposing (calculateActivePlayElement, repostionBarrels, removeOverlappingBarrels)
 import Player exposing (PlayerControls, updatePlayer, renderPlayer, PlayerControls, initialPlayerControls, calculatePlayerButtonsPressed)
 import Barrel exposing (renderBarrel)
 import Button exposing (ButtonState(..), calculateButtonState)
@@ -145,10 +145,11 @@ updateLevelEditMode deltaTime touchLocations state =
             touchLocations
                 |> List.map (convertTouchCoorToGameCoor state.camera)
 
-        movedBarrels =
+        newBarrels =
             state.barrels
                 |> addBarrel editModeButtonsPressed.addBarrelButton state.camera
                 |> repostionBarrels touchesInGameCoordinates
+                |> removeOverlappingBarrels
 
         levelCreationMode =
             if editModeButtonsPressed.switchToPlayTestMode == Pressed then
@@ -159,7 +160,7 @@ updateLevelEditMode deltaTime touchLocations state =
         { state
             | levelCreationMode = levelCreationMode
             , editModeButtons = editModeButtonsPressed
-            , barrels = movedBarrels
+            , barrels = newBarrels
         }
 
 
