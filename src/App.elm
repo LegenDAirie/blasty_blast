@@ -106,7 +106,7 @@ view model =
                     ( Camera.fixedWidth (getX gameSize) ( 0, 0 ), [] )
 
                 LevelCreateScreen state ->
-                    renderLevelCreation state
+                    ( state.camera, renderLevelCreation state )
     in
         div []
             [ Game.renderCenteredWithOptions

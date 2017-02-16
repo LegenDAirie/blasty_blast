@@ -198,7 +198,7 @@ addBarrel buttonPressed camera barrels =
             barrels
 
 
-renderLevelCreation : LevelCreateState -> ( Camera, List Renderable )
+renderLevelCreation : LevelCreateState -> List Renderable
 renderLevelCreation state =
     let
         overlay =
@@ -209,13 +209,11 @@ renderLevelCreation state =
                 LevelEdit ->
                     renderEditModeOverlay state
     in
-        ( state.camera
-        , List.concat
+        List.concat
             [ [ renderPlayer state.resources state.player ]
             , (List.map renderBarrel state.barrels)
             , overlay
             ]
-        )
 
 
 renderPlayTestOverlay : LevelCreateState -> List Renderable
