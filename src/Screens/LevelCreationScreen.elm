@@ -192,7 +192,7 @@ addBarrel buttonPressed camera barrels =
                 newBarrel =
                     Barrel newBarrelLocation 0 45
             in
-                newBarrel :: barrels
+                List.append barrels [ newBarrel ]
 
         _ ->
             barrels
