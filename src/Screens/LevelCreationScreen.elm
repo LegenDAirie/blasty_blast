@@ -7,7 +7,7 @@ import Vector2 as V2 exposing (getX, getY)
 import Color
 import GameTypes exposing (DeltaTime, Vector, Player, Barrel, ActiveElement(..))
 import Coordinates exposing (gameSize, convertTouchCoorToGameCoor)
-import GameLogic exposing (calculateActivePlayElement, repostionBarrels, removeOverlappingBarrels)
+import GameLogic exposing (calculateActivePlayElement, repostionBarrels, removeOverlappingBarrels, touchIsCollidingWithBarrel)
 import Player exposing (PlayerControls, updatePlayer, renderPlayer, PlayerControls, initialPlayerControls, calculatePlayerButtonsPressed)
 import Barrel exposing (renderBarrel)
 import Button exposing (ButtonState(..), calculateButtonState)
@@ -28,6 +28,8 @@ type alias LevelCreateState =
     , editModeButtons : EditModeControls
     , playTestModeButtons : PlayTestModeControls
     , playerControls : PlayerControls
+    , scrollScreenButton : ButtonState
+    , scrollScreenStartLocation : Maybe Vector
     }
 
 
@@ -73,6 +75,8 @@ initialLevelCreateState =
         , editModeButtons = defaultEditModeButtons
         , playTestModeButtons = defaultPlayTestModeButtons
         , playerControls = initialPlayerControls
+        , scrollScreenButton = Inactive
+        , scrollScreenStartLocation = Nothing
         }
 
 
@@ -145,6 +149,27 @@ updateLevelEditMode deltaTime touchLocations state =
             touchLocations
                 |> List.map (convertTouchCoorToGameCoor state.camera)
 
+        -- isTouch =
+        --     isScreenButtonBeingPressed
+        --
+        -- scrollScreenButton =
+        --     touchLocations
+        --         |> calculateButtonState isTouched state.scrollScreenButton
+        --
+        -- scrollScreenStartLocation =
+        --     if state.scrollScreenButton == Pressed then
+        --         touchLocation
+        --     else
+        --         state.scrollScreenStartLocation
+        --
+        -- touchHeldLocation =
+        --     if state.scrollScreenButton == Held then
+        --         touchLocation
+        --     else
+        --         state.scrollScreenStartLocation
+        --
+        -- newCamera =
+        --     scrollCamera
         newBarrels =
             state.barrels
                 |> addBarrel editModeButtonsPressed.addBarrelButton state.camera
@@ -164,19 +189,35 @@ updateLevelEditMode deltaTime touchLocations state =
         }
 
 
+
+-- isScreenButtonBeingPressed : List Vector -> List Barrel -> EditModeControls -> Bool
+-- isScreenButtonBeingPressed touchLocations barrels editModeControls =
+--     let
+--         -- anyTouches && noBarrelBeingTouch && noButtonsBeingTouched
+--         barrelsInTheWay =
+--             List.all (\touch -> List.any (touchIsCollidingWithBarrel touch) barrels) touchLocations
+--     in
+--         False
+
+
+areAnyBarrelsInTheWay : List Vector -> List Barrel -> Bool
+areAnyBarrelsInTheWay touchLocations barrels =
+    List.any (\touch -> List.any (touchIsCollidingWithBarrel touch) barrels) touchLocations
+
+
 calculateEditModeButtonsPressed : List Vector -> EditModeControls -> EditModeControls
 calculateEditModeButtonsPressed touchLocations editModeControls =
     let
-        switchToPlayTestModePressed =
+        isSwitchToPlayTestModePressed =
             touchLocations
                 |> List.any (\( x, y ) -> x < 250 && y > 500)
 
-        addBarrelPressed =
+        isAddBarrelPressed =
             touchLocations
                 |> List.any (\( x, y ) -> x > 960 && y < 200)
     in
-        { switchToPlayTestMode = calculateButtonState switchToPlayTestModePressed editModeControls.switchToPlayTestMode
-        , addBarrelButton = calculateButtonState addBarrelPressed editModeControls.addBarrelButton
+        { switchToPlayTestMode = calculateButtonState isSwitchToPlayTestModePressed editModeControls.switchToPlayTestMode
+        , addBarrelButton = calculateButtonState isAddBarrelPressed editModeControls.addBarrelButton
         }
 
 
@@ -186,7 +227,7 @@ addBarrel buttonPressed camera barrels =
         Pressed ->
             let
                 newBarrelLocation =
-                    ( 1120, 100 )
+                    ( 1120 + 45, 100 - 45 )
                         |> convertTouchCoorToGameCoor camera
 
                 newBarrel =
