@@ -202,7 +202,12 @@ updateLevelEditMode deltaTime touchLocations state =
 
 areAnyBarrelsInTheWay : List Vector -> List Barrel -> Bool
 areAnyBarrelsInTheWay touchLocations barrels =
-    List.any (\touch -> List.any (touchIsCollidingWithBarrel touch) barrels) touchLocations
+    List.any (anyBarrelsTouched barrels) touchLocations
+
+
+anyBarrelsTouched : List Barrel -> Vector -> Bool
+anyBarrelsTouched barrels touch =
+    List.any (touchIsCollidingWithBarrel touch) barrels
 
 
 calculateEditModeButtonsPressed : List Vector -> EditModeControls -> EditModeControls
