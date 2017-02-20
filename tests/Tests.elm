@@ -5,8 +5,9 @@ import Expect
 import String
 import App exposing (..)
 import GameTypes exposing (Player, Barrel)
+import Button exposing (ButtonState(..))
 import GameLogic exposing (hasPlayerCollided, touchIsCollidingWithBarrel)
-import Screens.LevelCreationScreen exposing (areAnyBarrelsInTheWay)
+import Screens.LevelCreationScreen exposing (areAnyBarrelsInTheWay, iScreenButtonBeingTouched)
 
 
 all : Test
@@ -79,5 +80,71 @@ all =
                             [ barrelOne, barrelTwo ]
                     in
                         Expect.false "Expected no barrels in the way" (areAnyBarrelsInTheWay touches barrels)
+            , test "scroll Screen Button being touched" <|
+                \() ->
+                    let
+                        touches =
+                            [ ( 4, 7 ), ( 7, 4 ) ]
+
+                        barrelOne =
+                            Barrel ( 20, 20 ) 0 2
+
+                        barrelTwo =
+                            Barrel ( 30, 30 ) 0 2
+
+                        barrels =
+                            [ barrelOne, barrelTwo ]
+
+                        editModeButtons =
+                            { switchToPlayTestMode = Inactive
+                            , addBarrelButton = Inactive
+                            }
+                    in
+                        iScreenButtonBeingTouched touches barrels editModeButtons
+                            |> Expect.true "Scroll Screen button being touched"
+            , test "scroll Screen Button being touched" <|
+                \() ->
+                    let
+                        touches =
+                            [ ( 4, 7 ), ( 7, 4 ) ]
+
+                        barrelOne =
+                            Barrel ( 20, 20 ) 0 2
+
+                        barrelTwo =
+                            Barrel ( 30, 30 ) 0 2
+
+                        barrels =
+                            [ barrelOne, barrelTwo ]
+
+                        editModeButtons =
+                            { switchToPlayTestMode = Held
+                            , addBarrelButton = Inactive
+                            }
+                    in
+                        iScreenButtonBeingTouched touches barrels editModeButtons
+                            |> Expect.false "switchToPlayTestMode being held should fail test"
+            , test "scroll Screen Button being touched" <|
+                \() ->
+                    let
+                        touches =
+                            [ ( 20, 20 ), ( 7, 4 ) ]
+
+                        barrelOne =
+                            Barrel ( 20, 20 ) 0 2
+
+                        barrelTwo =
+                            Barrel ( 30, 30 ) 0 2
+
+                        barrels =
+                            [ barrelOne, barrelTwo ]
+
+                        editModeButtons =
+                            { switchToPlayTestMode = Inactive
+                            , addBarrelButton = Inactive
+                            }
+                    in
+                        iScreenButtonBeingTouched touches barrels editModeButtons
+                            |> Expect.false "Barrel in the way should fail test"
             ]
         ]
