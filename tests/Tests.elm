@@ -3,11 +3,10 @@ module Tests exposing (..)
 import Test exposing (..)
 import Expect
 import String
-import App exposing (..)
 import GameTypes exposing (Player, Barrel)
 import Button exposing (ButtonState(..))
-import GameLogic exposing (hasPlayerCollided, touchIsCollidingWithBarrel)
-import Screens.LevelCreationScreen exposing (areAnyBarrelsInTheWay, iScreenButtonBeingTouched)
+import GameLogic exposing (hasPlayerCollided, touchIsCollidingWithBarrel, areAnyBarrelsInTheWay)
+import Screens.LevelCreationScreen exposing (isScreenBeingScrolled)
 
 
 all : Test
@@ -100,7 +99,7 @@ all =
                             , addBarrelButton = Inactive
                             }
                     in
-                        iScreenButtonBeingTouched touches barrels editModeButtons
+                        isScreenBeingScrolled touches barrels editModeButtons
                             |> Expect.true "Scroll Screen button being touched"
             , test "scroll Screen Button being touched" <|
                 \() ->
@@ -122,7 +121,7 @@ all =
                             , addBarrelButton = Inactive
                             }
                     in
-                        iScreenButtonBeingTouched touches barrels editModeButtons
+                        isScreenBeingScrolled touches barrels editModeButtons
                             |> Expect.false "switchToPlayTestMode being held should fail test"
             , test "scroll Screen Button being touched" <|
                 \() ->
@@ -144,7 +143,7 @@ all =
                             , addBarrelButton = Inactive
                             }
                     in
-                        iScreenButtonBeingTouched touches barrels editModeButtons
+                        isScreenBeingScrolled touches barrels editModeButtons
                             |> Expect.false "Barrel in the way should fail test"
             ]
         ]

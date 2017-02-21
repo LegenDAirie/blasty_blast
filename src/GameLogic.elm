@@ -5,6 +5,8 @@ module GameLogic
         , removeOverlappingBarrels
         , touchIsCollidingWithBarrel
         , hasPlayerCollided
+        , areAnyBarrelsInTheWay
+        , anyBarrelsTouched
         )
 
 import Vector2 as V2 exposing (distance)
@@ -35,6 +37,16 @@ hasPlayerCollided player barrel =
             player.collisionRadius + barrel.collisionRadius
     in
         distanceBetween < toFloat collectiveRadius
+
+
+areAnyBarrelsInTheWay : List Vector -> List Barrel -> Bool
+areAnyBarrelsInTheWay touchLocations barrels =
+    List.any (anyBarrelsTouched barrels) touchLocations
+
+
+anyBarrelsTouched : List Barrel -> Vector -> Bool
+anyBarrelsTouched barrels touch =
+    List.any (touchIsCollidingWithBarrel touch) barrels
 
 
 touchIsCollidingWithBarrel : Vector -> Barrel -> Bool

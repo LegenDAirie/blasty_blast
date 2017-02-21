@@ -7,10 +7,17 @@ import Vector2 as V2 exposing (getX, getY)
 import Color
 import GameTypes exposing (DeltaTime, Vector, Player, Barrel, ActiveElement(..))
 import Coordinates exposing (gameSize, convertTouchCoorToGameCoor)
-import GameLogic exposing (calculateActivePlayElement, repostionBarrels, removeOverlappingBarrels, touchIsCollidingWithBarrel)
 import Player exposing (PlayerControls, updatePlayer, renderPlayer, PlayerControls, initialPlayerControls, calculatePlayerButtonsPressed)
 import Barrel exposing (renderBarrel)
 import Button exposing (ButtonState(..), calculateButtonState)
+import GameLogic
+    exposing
+        ( calculateActivePlayElement
+        , repostionBarrels
+        , removeOverlappingBarrels
+        , touchIsCollidingWithBarrel
+        , areAnyBarrelsInTheWay
+        )
 
 
 type LevelCreationMode
@@ -149,48 +156,15 @@ updateLevelEditMode deltaTime touchLocations state =
             touchLocations
                 |> List.map (convertTouchCoorToGameCoor state.camera)
 
-        isTouch =
-            iScreenButtonBeingTouched touchLocations state.barrels state.editModeButtons
-
-        currentScreenScrollTouchLocation =
-            if isTouch then
-                List.head touchLocations
-            else
-                Nothing
+        beingScrolled =
+            isScreenBeingScrolled touchesInGameCoordinates state.barrels state.editModeButtons
 
         ( offSetCameraBy, newStartLocation ) =
-            case state.scrollScreenStartLocation of
-                Just start ->
-                    case currentScreenScrollTouchLocation of
-                        Just end ->
-                            let
-                                dif =
-                                    V2.sub start end
-                                        |> (\( x, y ) -> ( x, -y ))
-
-                                _ =
-                                    Debug.log "difference" dif
-                            in
-                                ( dif, Just end )
-
-                        Nothing ->
-                            let
-                                _ =
-                                    Debug.log "no current location" 1
-                            in
-                                ( ( 0, 0 ), Nothing )
-
-                Nothing ->
-                    case currentScreenScrollTouchLocation of
-                        Just end ->
-                            ( ( 0, 0 ), Just end )
-
-                        Nothing ->
-                            let
-                                _ =
-                                    Debug.log "no start location" 1
-                            in
-                                ( ( 0, 0 ), Nothing )
+            if beingScrolled then
+                state.scrollScreenStartLocation
+                    |> getScreenScrollCameraOffSet (List.head touchLocations)
+            else
+                ( ( 0, 0 ), Nothing )
 
         newCamera =
             Camera.moveBy offSetCameraBy state.camera
@@ -216,29 +190,44 @@ updateLevelEditMode deltaTime touchLocations state =
         }
 
 
-iScreenButtonBeingTouched : List Vector -> List Barrel -> EditModeControls -> Bool
-iScreenButtonBeingTouched touchLocations barrels editModeControls =
+getScreenScrollCameraOffSet : Maybe Vector -> Maybe Vector -> ( Vector, Maybe Vector )
+getScreenScrollCameraOffSet currentLocation startLocation =
+    case startLocation of
+        Just start ->
+            case currentLocation of
+                Just end ->
+                    let
+                        dif =
+                            V2.sub start end
+                                |> (\( x, y ) -> ( x, -y ))
+                    in
+                        ( dif, Just end )
+
+                Nothing ->
+                    ( ( 0, 0 ), Nothing )
+
+        Nothing ->
+            case currentLocation of
+                Just end ->
+                    ( ( 0, 0 ), Just end )
+
+                Nothing ->
+                    ( ( 0, 0 ), Nothing )
+
+
+isScreenBeingScrolled : List Vector -> List Barrel -> EditModeControls -> Bool
+isScreenBeingScrolled touchLocations barrels editModeControls =
     let
         barrelsInTheWay =
             areAnyBarrelsInTheWay touchLocations barrels
 
-        noButtonsBeingPressed =
+        allButtonsInactive =
             [ editModeControls.addBarrelButton
             , editModeControls.switchToPlayTestMode
             ]
                 |> List.all (\buttonState -> buttonState == Inactive)
     in
-        not barrelsInTheWay && noButtonsBeingPressed
-
-
-areAnyBarrelsInTheWay : List Vector -> List Barrel -> Bool
-areAnyBarrelsInTheWay touchLocations barrels =
-    List.any (anyBarrelsTouched barrels) touchLocations
-
-
-anyBarrelsTouched : List Barrel -> Vector -> Bool
-anyBarrelsTouched barrels touch =
-    List.any (touchIsCollidingWithBarrel touch) barrels
+        not barrelsInTheWay && allButtonsInactive
 
 
 calculateEditModeButtonsPressed : List Vector -> EditModeControls -> EditModeControls
