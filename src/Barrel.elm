@@ -44,7 +44,15 @@ updateRotation dt activeElement controls barrel =
 
 updateMovement : DeltaTime -> ActiveElement -> Barrel -> Barrel
 updateMovement dt activeElement barrel =
-    barrel
+    case barrel.movement of
+        NoMovement ->
+            barrel
+
+        LinePath { startNode, endNode, startingDirection, speed } ->
+            barrel
+
+        CirclePath { trackRadius, clockWiseMovement } ->
+            barrel
 
 
 
