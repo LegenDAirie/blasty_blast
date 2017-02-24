@@ -126,20 +126,14 @@ updatePlayTestingMode deltaTime touchLocations state =
         playerButtonsPressed =
             calculatePlayerButtonsPressed touchLocations state.playerControls
 
-        activeElement =
-            calculateActivePlayElement state.player state.barrels
-
-        newActiveElement =
-            if playerButtonsPressed.fire == Pressed then
-                ThePlayer
-            else
-                activeElement
-
         newPlayer =
-            updatePlayer deltaTime activeElement playerButtonsPressed state.player
+            updatePlayer deltaTime state.activeElement playerButtonsPressed state.player
 
         newBarrels =
-            updateBarrels deltaTime activeElement playerButtonsPressed state.barrels
+            updateBarrels deltaTime state.activeElement playerButtonsPressed state.barrels
+
+        newActiveElement =
+            calculateActivePlayElement newPlayer newBarrels
 
         levelCreationMode =
             if playTestModebuttonsPressed.switchToEditMode == Pressed then
