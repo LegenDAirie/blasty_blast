@@ -1,25 +1,64 @@
-module Barrel exposing (updateBarrel, renderBarrel)
+module Barrel exposing (renderBarrel, updateBarrels)
 
 import Game.TwoD.Render as Render exposing (Renderable)
 import Vector2 as V2 exposing (getX, getY)
 import Color
 import GameTypes exposing (..)
+import Player exposing (PlayerControls)
 
 
-updateBarrel : (Barrel -> Barrel) -> List Barrel -> Barrel -> List Barrel
-updateBarrel fn barrels barrelToUpdate =
-    case barrels of
-        barrel :: rest ->
-            if barrel == barrelToUpdate then
-                fn barrel :: rest
-            else
-                barrel :: updateBarrel fn rest barrelToUpdate
-
-        [] ->
-            []
+updateBarrels : DeltaTime -> ActiveElement -> PlayerControls -> List Barrel -> List Barrel
+updateBarrels dt activeElement controls barrels =
+    barrels
+        |> List.map (updateBarrel dt activeElement controls)
 
 
+updateBarrel : DeltaTime -> ActiveElement -> PlayerControls -> Barrel -> Barrel
+updateBarrel dt activeElement controls barrel =
+    barrel
+        |> (updateRotation dt activeElement controls)
+        |> (updateMovement dt activeElement)
 
+
+updateRotation : DeltaTime -> ActiveElement -> PlayerControls -> Barrel -> Barrel
+updateRotation dt activeElement controls barrel =
+    case barrel.rotation of
+        NoRotation { autoFire } ->
+            barrel
+
+        AutoWithNoControl { range, clockWise, rotationStyle } ->
+            barrel
+
+        AutoWithDirectionControl { clockWise } ->
+            barrel
+
+        AutoRotateToAndStop { autoFire, endAngle } ->
+            barrel
+
+        ManualRotation { range } ->
+            barrel
+
+        ManualTimedFire { timeTillFire } ->
+            barrel
+
+
+updateMovement : DeltaTime -> ActiveElement -> Barrel -> Barrel
+updateMovement dt activeElement barrel =
+    barrel
+
+
+
+-- updateBarrel : (Barrel -> Barrel) -> List Barrel -> Barrel -> List Barrel
+-- updateBarrel fn barrels barrelToUpdate =
+--     case barrels of
+--         barrel :: rest ->
+--             if barrel == barrelToUpdate then
+--                 fn barrel :: rest
+--             else
+--                 barrel :: updateBarrel fn rest barrelToUpdate
+--
+--         [] ->
+--             []
 -- rotation
 -- let
 --     transformBarrel =

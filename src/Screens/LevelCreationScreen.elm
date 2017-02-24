@@ -8,7 +8,7 @@ import Color
 import GameTypes exposing (..)
 import Coordinates exposing (gameSize, convertTouchCoorToGameCoor)
 import Player exposing (PlayerControls, updatePlayer, renderPlayer, PlayerControls, initialPlayerControls, calculatePlayerButtonsPressed)
-import Barrel exposing (renderBarrel)
+import Barrel exposing (renderBarrel, updateBarrels)
 import Button exposing (ButtonState(..), calculateButtonState)
 import GameLogic
     exposing
@@ -138,6 +138,9 @@ updatePlayTestingMode deltaTime touchLocations state =
         newPlayer =
             updatePlayer deltaTime activeElement playerButtonsPressed state.player
 
+        newBarrels =
+            updateBarrels deltaTime activeElement playerButtonsPressed state.barrels
+
         levelCreationMode =
             if playTestModebuttonsPressed.switchToEditMode == Pressed then
                 LevelEdit
@@ -146,6 +149,7 @@ updatePlayTestingMode deltaTime touchLocations state =
     in
         { state
             | player = newPlayer
+            , barrels = newBarrels
             , camera = Camera.follow 0.5 0.17 (V2.sub state.player.location ( -100, -100 )) state.camera
             , activeElement = newActiveElement
             , levelCreationMode = levelCreationMode
