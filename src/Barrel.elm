@@ -3,11 +3,7 @@ module Barrel exposing (updateBarrel, renderBarrel)
 import Game.TwoD.Render as Render exposing (Renderable)
 import Vector2 as V2 exposing (getX, getY)
 import Color
-import GameTypes exposing (Vector, Barrel)
-
-
-type alias Angle =
-    Float
+import GameTypes exposing (..)
 
 
 updateBarrel : (Barrel -> Barrel) -> List Barrel -> Barrel -> List Barrel
@@ -34,7 +30,7 @@ updateBarrel fn barrels barrelToUpdate =
 --     }
 
 
-rotate : Angle -> (Barrel -> Barrel)
+rotate : Float -> (Barrel -> Barrel)
 rotate offsetAngle barrel =
     { barrel
         | angle = barrel.angle + offsetAngle

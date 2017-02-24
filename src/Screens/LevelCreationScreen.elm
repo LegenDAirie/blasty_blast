@@ -5,7 +5,7 @@ import Game.TwoD.Camera as Camera exposing (Camera, getPosition)
 import Game.Resources as Resources exposing (Resources)
 import Vector2 as V2 exposing (getX, getY)
 import Color
-import GameTypes exposing (DeltaTime, Vector, Player, Barrel, ActiveElement(..))
+import GameTypes exposing (..)
 import Coordinates exposing (gameSize, convertTouchCoorToGameCoor)
 import Player exposing (PlayerControls, updatePlayer, renderPlayer, PlayerControls, initialPlayerControls, calculatePlayerButtonsPressed)
 import Barrel exposing (renderBarrel)
@@ -64,6 +64,26 @@ defaultPlayTestModeButtons =
     }
 
 
+initialBarrelOne : Barrel
+initialBarrelOne =
+    { location = ( 0, -100 )
+    , angle = (pi / 2)
+    , collisionRadius = 45
+    , rotation = NoRotation (NoRotationSpec False)
+    , movement = NoMovement
+    }
+
+
+initialBarrelTwo : Barrel
+initialBarrelTwo =
+    { location = ( 200, -100 )
+    , angle = (pi / 2)
+    , collisionRadius = 45
+    , rotation = NoRotation (NoRotationSpec False)
+    , movement = NoMovement
+    }
+
+
 initialLevelCreateState : LevelCreateState
 initialLevelCreateState =
     let
@@ -74,7 +94,7 @@ initialLevelCreateState =
             gameSize
     in
         { player = Player startingPoint ( 0, 0 ) 45
-        , barrels = [ Barrel ( 0, -100 ) (pi / 2) 45, Barrel ( 200, -100 ) (pi / 2) 45 ]
+        , barrels = [ initialBarrelOne, initialBarrelTwo ]
         , activeElement = ThePlayer
         , camera = Camera.fixedWidth gameWidth startingPoint
         , resources = Resources.init
@@ -116,7 +136,7 @@ updatePlayTestingMode deltaTime touchLocations state =
                 activeElement
 
         newPlayer =
-            updatePlayer deltaTime activeElement state.playerControls state.player
+            updatePlayer deltaTime activeElement playerButtonsPressed state.player
 
         levelCreationMode =
             if playTestModebuttonsPressed.switchToEditMode == Pressed then
@@ -251,12 +271,17 @@ addBarrel buttonPressed camera barrels =
     case buttonPressed of
         Pressed ->
             let
-                newBarrelLocation =
+                initialBarrelLocation =
                     ( 1120 + 45, 100 - 45 )
                         |> convertTouchCoorToGameCoor camera
 
                 newBarrel =
-                    Barrel newBarrelLocation 0 45
+                    { location = initialBarrelLocation
+                    , angle = (pi / 2)
+                    , collisionRadius = 45
+                    , rotation = NoRotation { autoFire = False }
+                    , movement = NoMovement
+                    }
             in
                 List.append barrels [ newBarrel ]
 
