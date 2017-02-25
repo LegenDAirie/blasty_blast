@@ -34,17 +34,34 @@ calculatePlayerButtonsPressed touchLocations playerControls =
 
 updatePlayer : DeltaTime -> ActiveElement -> PlayerControls -> Player -> Player
 updatePlayer deltaTime activeElement buttonsPressed player =
-    let
-        newPlayer =
+    case activeElement of
+        ThePlayer ->
             applyPhysics deltaTime activeElement buttonsPressed player
 
-        firedPlayer =
-            if buttonsPressed.fire == Pressed then
-                fire activeElement newPlayer
-            else
-                newPlayer
-    in
-        firedPlayer
+        ThisBarrel barrel ->
+            let
+                playerInBarrel =
+                    { player
+                        | location = barrel.location
+                        , velocity = ( 0, 0 )
+                    }
+
+                autoFire =
+                    shouldBarrelFire barrel
+            in
+                if buttonsPressed.fire == Pressed || autoFire then
+                    fireFromBarrel barrel playerInBarrel
+                else
+                    playerInBarrel
+
+
+shouldBarrelFire : Barrel -> Bool
+shouldBarrelFire barrel =
+    False
+
+
+
+-- case barrel.rotation of
 
 
 applyPhysics : DeltaTime -> ActiveElement -> PlayerControls -> Player -> Player
@@ -74,22 +91,11 @@ applyPhysics deltaTime activeElement playerControls player =
             newVelocity
                 |> V2.add player.location
                 |> resetPlayerToOrigin
-
-        newPlayer =
-            case activeElement of
-                ThePlayer ->
-                    { player
-                        | location = newLocation
-                        , velocity = newVelocity
-                    }
-
-                ThisBarrel barrel ->
-                    { player
-                        | location = barrel.location
-                        , velocity = ( 0, 0 )
-                    }
     in
-        newPlayer
+        { player
+            | location = newLocation
+            , velocity = newVelocity
+        }
 
 
 resetPlayerToOrigin : Vector -> Vector
@@ -98,16 +104,6 @@ resetPlayerToOrigin location =
         ( 0, 0 )
     else
         location
-
-
-fire : ActiveElement -> Player -> Player
-fire activeElement player =
-    case activeElement of
-        ThePlayer ->
-            player
-
-        ThisBarrel barrel ->
-            fireFromBarrel barrel player
 
 
 fireFromBarrel : Barrel -> Player -> Player
