@@ -44,15 +44,6 @@ updateRotation dt activeElement controls barrel =
 shouldBarrelFire : Barrel -> Bool
 shouldBarrelFire barrel =
     case barrel.rotation of
-        AutoWithNoControl spec ->
-            False
-
-        AutoWithDirectionControl spec ->
-            False
-
-        ManualRotation spec ->
-            False
-
         NoRotation { autoFire } ->
             False
 
@@ -60,6 +51,15 @@ shouldBarrelFire barrel =
             False
 
         ManualTimedFire { timeTillFire } ->
+            False
+
+        AutoWithNoControl spec ->
+            False
+
+        AutoWithDirectionControl spec ->
+            False
+
+        ManualRotation spec ->
             False
 
 
