@@ -1,10 +1,9 @@
-module Barrel exposing (renderBarrel, updateBarrels)
+module Barrel exposing (renderBarrel, updateBarrels, shouldBarrelFire)
 
 import Game.TwoD.Render as Render exposing (Renderable)
 import Vector2 as V2 exposing (getX, getY)
 import Color
 import GameTypes exposing (..)
-import Player exposing (PlayerControls)
 
 
 updateBarrels : DeltaTime -> ActiveElement -> PlayerControls -> List Barrel -> List Barrel
@@ -40,6 +39,28 @@ updateRotation dt activeElement controls barrel =
 
         ManualTimedFire { timeTillFire } ->
             barrel
+
+
+shouldBarrelFire : Barrel -> Bool
+shouldBarrelFire barrel =
+    case barrel.rotation of
+        AutoWithNoControl spec ->
+            False
+
+        AutoWithDirectionControl spec ->
+            False
+
+        ManualRotation spec ->
+            False
+
+        NoRotation { autoFire } ->
+            False
+
+        AutoRotateToAndStop { autoFire, endAngle } ->
+            False
+
+        ManualTimedFire { timeTillFire } ->
+            False
 
 
 updateMovement : DeltaTime -> ActiveElement -> Barrel -> Barrel

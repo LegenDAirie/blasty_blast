@@ -1,5 +1,7 @@
 module GameTypes exposing (..)
 
+import Button exposing (ButtonState)
+
 
 type alias Vector =
     ( Float, Float )
@@ -13,6 +15,13 @@ type alias Player =
     { location : Vector
     , velocity : Vector
     , collisionRadius : Int
+    }
+
+
+type alias PlayerControls =
+    { left : ButtonState
+    , right : ButtonState
+    , fire : ButtonState
     }
 
 

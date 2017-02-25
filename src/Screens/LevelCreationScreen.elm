@@ -7,7 +7,7 @@ import Vector2 as V2 exposing (getX, getY)
 import Color
 import GameTypes exposing (..)
 import Coordinates exposing (gameSize, convertTouchCoorToGameCoor)
-import Player exposing (PlayerControls, updatePlayer, renderPlayer, PlayerControls, initialPlayerControls, calculatePlayerButtonsPressed)
+import Player exposing (updatePlayer, renderPlayer, initialPlayerControls, calculatePlayerButtonsPressed)
 import Barrel exposing (renderBarrel, updateBarrels)
 import Button exposing (ButtonState(..), calculateButtonState)
 import GameLogic

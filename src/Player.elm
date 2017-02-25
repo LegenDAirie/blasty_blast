@@ -1,19 +1,13 @@
-module Player exposing (updatePlayer, renderPlayer, PlayerControls, initialPlayerControls, calculatePlayerButtonsPressed)
+module Player exposing (updatePlayer, renderPlayer, initialPlayerControls, calculatePlayerButtonsPressed)
 
 import Vector2 as V2 exposing (getX, getY)
 import Game.TwoD.Render as Render exposing (Renderable, rectangle)
 import Game.Resources as Resources exposing (Resources)
 import Color
-import GameTypes exposing (ActiveElement(..), Vector, DeltaTime, Player, Barrel)
+import GameTypes exposing (ActiveElement(..), PlayerControls, Vector, DeltaTime, Player, Barrel)
 import Forces exposing (gravity, controllerLeftForce, controllerRightForce, speedCap, resistance, blastForce)
 import Button exposing (ButtonState(..), calculateButtonState)
-
-
-type alias PlayerControls =
-    { left : ButtonState
-    , right : ButtonState
-    , fire : ButtonState
-    }
+import Barrel exposing (shouldBarrelFire)
 
 
 initialPlayerControls : PlayerControls
@@ -53,15 +47,6 @@ updatePlayer deltaTime activeElement buttonsPressed player =
                     fireFromBarrel barrel playerInBarrel
                 else
                     playerInBarrel
-
-
-shouldBarrelFire : Barrel -> Bool
-shouldBarrelFire barrel =
-    False
-
-
-
--- case barrel.rotation of
 
 
 applyPhysics : DeltaTime -> ActiveElement -> PlayerControls -> Player -> Player
