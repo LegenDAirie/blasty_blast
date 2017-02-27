@@ -100,7 +100,7 @@ type alias AutoWithDirectionControlSpec =
 
 type alias AutoRotateToAndStopSpec =
     { fireType : FireType
-    , endAngle : Vector
+    , endAngle : Float
     }
 
 
@@ -111,7 +111,8 @@ type alias ManualRotationSpec =
 
 
 type alias ManualTimedFireSpec =
-    { maxTimeOccupied : Float
+    { setToFire : Bool
+    , maxTimeOccupied : Float
     }
 
 

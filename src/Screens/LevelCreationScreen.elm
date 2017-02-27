@@ -77,11 +77,55 @@ initialBarrelOne =
 
 initialBarrelTwo : Barrel
 initialBarrelTwo =
-    { location = ( 200, -100 )
+    { location = ( 300, -100 )
     , angle = (pi / 2)
     , collisionRadius = 45
     , timeOccupied = 0
-    , rotation = NoRotation (NoRotationSpec (ManualFire False))
+    , rotation = AutoWithNoControl (AutoWithNoControlSpec False ( 0, pi ) True Continuous)
+    , movement = NoMovement
+    }
+
+
+initialBarrelThree : Barrel
+initialBarrelThree =
+    { location = ( 600, -100 )
+    , angle = (pi / 2)
+    , collisionRadius = 45
+    , timeOccupied = 0
+    , rotation = AutoWithDirectionControl (AutoWithDirectionControlSpec False True)
+    , movement = NoMovement
+    }
+
+
+initialBarrelFour : Barrel
+initialBarrelFour =
+    { location = ( 800, -100 )
+    , angle = pi
+    , collisionRadius = 45
+    , timeOccupied = 0
+    , rotation = AutoRotateToAndStop (AutoRotateToAndStopSpec AutoFire (pi / 4))
+    , movement = NoMovement
+    }
+
+
+initialBarrelFive : Barrel
+initialBarrelFive =
+    { location = ( -300, -100 )
+    , angle = pi
+    , collisionRadius = 45
+    , timeOccupied = 0
+    , rotation = ManualRotation (ManualRotationSpec False ( 0, 3 * pi / 2 ))
+    , movement = NoMovement
+    }
+
+
+initialBarrelSix : Barrel
+initialBarrelSix =
+    { location = ( -600, -100 )
+    , angle = pi
+    , collisionRadius = 45
+    , timeOccupied = 0
+    , rotation = ManualTimedFire (ManualTimedFireSpec False 2)
     , movement = NoMovement
     }
 
@@ -96,7 +140,7 @@ initialLevelCreateState =
             gameSize
     in
         { player = Player startingPoint ( 0, 0 ) 45
-        , barrels = [ initialBarrelOne, initialBarrelTwo ]
+        , barrels = [ initialBarrelOne, initialBarrelTwo, initialBarrelThree, initialBarrelFour, initialBarrelFive, initialBarrelSix ]
         , activeElement = ThePlayer
         , camera = Camera.fixedWidth gameWidth startingPoint
         , resources = Resources.init

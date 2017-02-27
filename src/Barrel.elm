@@ -39,9 +39,9 @@ updateActiveBarrel : DeltaTime -> PlayerControls -> Barrel -> Barrel
 updateActiveBarrel deltaTime controls barrel =
     { barrel
         | timeOccupied = barrel.timeOccupied + deltaTime
-        , rotation = updateRotationSpec deltaTime controls barrel.rotation
         , movement = updateMovementSpec deltaTime barrel.movement
     }
+        |> updateRotation deltaTime controls
 
 
 inactiveRotationSpec : Rotation -> Rotation
@@ -55,55 +55,206 @@ inactiveRotationSpec rotation =
                 ManualFire setToFire ->
                     NoRotation (NoRotationSpec (ManualFire False))
 
-        AutoWithNoControl { setToFire } ->
-            rotation
-
-        AutoWithDirectionControl { setToFire } ->
-            rotation
-
-        AutoRotateToAndStop { fireType } ->
-            rotation
-
-        ManualRotation { setToFire } ->
-            rotation
-
-        ManualTimedFire { maxTimeOccupied } ->
-            rotation
-
-
-updateRotationSpec : DeltaTime -> PlayerControls -> Rotation -> Rotation
-updateRotationSpec dt controls rotation =
-    case rotation of
-        NoRotation { fireType } ->
+        AutoRotateToAndStop { fireType, endAngle } ->
             case fireType of
                 AutoFire ->
-                    rotation
+                    AutoRotateToAndStop (AutoRotateToAndStopSpec AutoFire endAngle)
 
                 ManualFire setToFire ->
+                    AutoRotateToAndStop (AutoRotateToAndStopSpec (ManualFire False) endAngle)
+
+        AutoWithNoControl spec ->
+            { spec
+                | setToFire = False
+            }
+                |> AutoWithNoControl
+
+        AutoWithDirectionControl spec ->
+            { spec
+                | setToFire = False
+            }
+                |> AutoWithDirectionControl
+
+        ManualRotation spec ->
+            { spec
+                | setToFire = False
+            }
+                |> ManualRotation
+
+        ManualTimedFire spec ->
+            { spec
+                | setToFire = False
+            }
+                |> ManualTimedFire
+
+
+updateRotation : DeltaTime -> PlayerControls -> Barrel -> Barrel
+updateRotation deltaTime controls barrel =
+    case barrel.rotation of
+        NoRotation { fireType } ->
+            let
+                newRotation =
+                    case fireType of
+                        AutoFire ->
+                            barrel.rotation
+
+                        ManualFire setToFire ->
+                            case setToFire of
+                                True ->
+                                    barrel.rotation
+
+                                False ->
+                                    if controls.fire == Pressed then
+                                        NoRotation (NoRotationSpec (ManualFire True))
+                                    else
+                                        barrel.rotation
+            in
+                { barrel
+                    | rotation = newRotation
+                }
+
+        AutoRotateToAndStop { fireType, endAngle } ->
+            let
+                newRotation =
+                    case fireType of
+                        AutoFire ->
+                            barrel.rotation
+
+                        ManualFire setToFire ->
+                            case setToFire of
+                                True ->
+                                    barrel.rotation
+
+                                False ->
+                                    if controls.fire == Pressed then
+                                        AutoRotateToAndStop (AutoRotateToAndStopSpec (ManualFire True) endAngle)
+                                    else
+                                        barrel.rotation
+
+                updatedAngle =
+                    if barrel.angle < endAngle then
+                        clamp barrel.angle endAngle (barrel.angle + deltaTime * 5)
+                    else
+                        clamp endAngle barrel.angle (barrel.angle - deltaTime * 5)
+            in
+                { barrel
+                    | rotation = newRotation
+                    , angle = updatedAngle
+                }
+
+        AutoWithNoControl { setToFire, range, clockWise, rotationStyle } ->
+            let
+                newRotation =
                     case setToFire of
                         True ->
-                            rotation
+                            barrel.rotation
 
                         False ->
                             if controls.fire == Pressed then
-                                NoRotation (NoRotationSpec (ManualFire True))
+                                AutoWithNoControl (AutoWithNoControlSpec True range clockWise rotationStyle)
                             else
-                                rotation
+                                barrel.rotation
 
-        AutoWithNoControl { setToFire, range, clockWise, rotationStyle } ->
-            rotation
+                newAngle =
+                    if clockWise then
+                        barrel.angle - deltaTime * 5
+                    else
+                        barrel.angle + deltaTime * 5
+            in
+                { barrel
+                    | rotation = newRotation
+                    , angle = newAngle
+                }
 
-        AutoWithDirectionControl { clockWise } ->
-            rotation
+        AutoWithDirectionControl { setToFire, clockWise } ->
+            let
+                readyToFire =
+                    case setToFire of
+                        True ->
+                            setToFire
 
-        AutoRotateToAndStop { fireType, endAngle } ->
-            rotation
+                        False ->
+                            if controls.fire == Pressed then
+                                True
+                            else
+                                setToFire
 
-        ManualRotation { range } ->
-            rotation
+                stillClockWise =
+                    if controls.left == Pressed || controls.left == Held then
+                        False
+                    else if controls.right == Pressed || controls.right == Held then
+                        True
+                    else
+                        clockWise
 
-        ManualTimedFire { maxTimeOccupied } ->
-            rotation
+                newRotation =
+                    AutoWithDirectionControl (AutoWithDirectionControlSpec readyToFire stillClockWise)
+
+                newAngle =
+                    if stillClockWise then
+                        barrel.angle - deltaTime * 5
+                    else
+                        barrel.angle + deltaTime * 5
+            in
+                { barrel
+                    | rotation = newRotation
+                    , angle = newAngle
+                }
+
+        ManualRotation { setToFire, range } ->
+            let
+                newRotation =
+                    case setToFire of
+                        True ->
+                            barrel.rotation
+
+                        False ->
+                            if controls.fire == Pressed then
+                                ManualRotation (ManualRotationSpec True range)
+                            else
+                                barrel.rotation
+
+                ( minAngle, maxAngle ) =
+                    range
+
+                newAngle =
+                    if controls.left == Pressed || controls.left == Held then
+                        clamp minAngle maxAngle barrel.angle - deltaTime * 5
+                    else if controls.right == Pressed || controls.right == Held then
+                        clamp minAngle maxAngle barrel.angle + deltaTime * 5
+                    else
+                        barrel.angle
+            in
+                { barrel
+                    | rotation = newRotation
+                    , angle = newAngle
+                }
+
+        ManualTimedFire { setToFire, maxTimeOccupied } ->
+            let
+                newRotation =
+                    case setToFire of
+                        True ->
+                            barrel.rotation
+
+                        False ->
+                            if barrel.timeOccupied >= maxTimeOccupied then
+                                ManualTimedFire (ManualTimedFireSpec True maxTimeOccupied)
+                            else
+                                barrel.rotation
+
+                newAngle =
+                    if controls.left == Pressed || controls.left == Held then
+                        barrel.angle + deltaTime * 5
+                    else if controls.right == Pressed || controls.right == Held then
+                        barrel.angle - deltaTime * 5
+                    else
+                        barrel.angle
+            in
+                { barrel
+                    | rotation = newRotation
+                    , angle = newAngle
+                }
 
 
 updateMovementSpec : DeltaTime -> Movement -> Movement
@@ -138,11 +289,8 @@ shouldBarrelFire barrel =
                 ManualFire setToFire ->
                     setToFire && exceededMinTimeOccupiedToFire barrel.timeOccupied
 
-        ManualTimedFire { maxTimeOccupied } ->
-            if maxTimeOccupied <= 0 then
-                True
-            else
-                False
+        ManualTimedFire { setToFire } ->
+            setToFire && exceededMinTimeOccupiedToFire barrel.timeOccupied
 
         AutoWithNoControl { setToFire } ->
             setToFire && exceededMinTimeOccupiedToFire barrel.timeOccupied
