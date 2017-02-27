@@ -28,18 +28,20 @@ updateBarrel deltaTime activeElement controls barrel =
 
 updateNonActiveBarrel : DeltaTime -> Barrel -> Barrel
 updateNonActiveBarrel deltaTime barrel =
-    barrel
-        |> (\barrel -> { barrel | timeOccupied = 0 })
-        |> (\barrel -> { barrel | rotation = inactiveRotationSpec barrel.rotation })
-        |> updateMovement deltaTime
+    { barrel
+        | timeOccupied = 0
+        , rotation = inactiveRotationSpec barrel.rotation
+        , movement = updateMovementSpec deltaTime barrel.movement
+    }
 
 
 updateActiveBarrel : DeltaTime -> PlayerControls -> Barrel -> Barrel
 updateActiveBarrel deltaTime controls barrel =
-    barrel
-        |> (\barrel -> { barrel | timeOccupied = barrel.timeOccupied + deltaTime })
-        |> updateRotation deltaTime controls
-        |> updateMovement deltaTime
+    { barrel
+        | timeOccupied = barrel.timeOccupied + deltaTime
+        , rotation = updateRotationSpec deltaTime controls barrel.rotation
+        , movement = updateMovementSpec deltaTime barrel.movement
+    }
 
 
 inactiveRotationSpec : Rotation -> Rotation
@@ -54,69 +56,67 @@ inactiveRotationSpec rotation =
                     NoRotation (NoRotationSpec (ManualFire False))
 
         AutoWithNoControl { setToFire } ->
-            NoRotation (NoRotationSpec AutoFire)
+            rotation
 
         AutoWithDirectionControl { setToFire } ->
-            NoRotation (NoRotationSpec AutoFire)
+            rotation
 
         AutoRotateToAndStop { fireType } ->
-            NoRotation (NoRotationSpec AutoFire)
+            rotation
 
         ManualRotation { setToFire } ->
-            NoRotation (NoRotationSpec AutoFire)
+            rotation
 
         ManualTimedFire { maxTimeOccupied } ->
-            NoRotation (NoRotationSpec AutoFire)
+            rotation
 
 
-updateRotation : DeltaTime -> PlayerControls -> Barrel -> Barrel
-updateRotation dt controls barrel =
-    case barrel.rotation of
+updateRotationSpec : DeltaTime -> PlayerControls -> Rotation -> Rotation
+updateRotationSpec dt controls rotation =
+    case rotation of
         NoRotation { fireType } ->
             case fireType of
                 AutoFire ->
-                    barrel
+                    rotation
 
                 ManualFire setToFire ->
                     case setToFire of
                         True ->
-                            barrel
+                            rotation
 
                         False ->
                             if controls.fire == Pressed then
-                                { barrel
-                                    | rotation = NoRotation (NoRotationSpec (ManualFire True))
-                                }
+                                NoRotation (NoRotationSpec (ManualFire True))
                             else
-                                barrel
+                                rotation
 
-        AutoWithNoControl { range, clockWise, rotationStyle } ->
-            barrel
+        AutoWithNoControl { setToFire, range, clockWise, rotationStyle } ->
+            rotation
 
         AutoWithDirectionControl { clockWise } ->
-            barrel
+            rotation
 
         AutoRotateToAndStop { fireType, endAngle } ->
-            barrel
+            rotation
 
         ManualRotation { range } ->
-            barrel
+            rotation
 
         ManualTimedFire { maxTimeOccupied } ->
-            barrel
+            rotation
 
 
-updateMovement : DeltaTime -> Barrel -> Barrel
-updateMovement dt barrel =
-    case barrel.movement of
+updateMovementSpec : DeltaTime -> Movement -> Movement
+updateMovementSpec deltaTime movement =
+    case movement of
         NoMovement ->
-            barrel
+            movement
 
         LinePath { startNode, endNode, startingDirection, speed } ->
-            barrel
+            movement
 
         CirclePath { trackRadius, clockWiseMovement } ->
-            barrel
+            movement
 
 
 shouldBarrelFire : Barrel -> Bool
