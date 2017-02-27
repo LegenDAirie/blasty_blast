@@ -69,7 +69,8 @@ initialBarrelOne =
     { location = ( 0, -100 )
     , angle = (pi / 2)
     , collisionRadius = 45
-    , rotation = NoRotation (NoRotationSpec False)
+    , timeOccupied = 0
+    , rotation = NoRotation (NoRotationSpec AutoFire)
     , movement = NoMovement
     }
 
@@ -79,7 +80,8 @@ initialBarrelTwo =
     { location = ( 200, -100 )
     , angle = (pi / 2)
     , collisionRadius = 45
-    , rotation = NoRotation (NoRotationSpec False)
+    , timeOccupied = 0
+    , rotation = NoRotation (NoRotationSpec AutoFire)
     , movement = NoMovement
     }
 
@@ -277,7 +279,8 @@ addBarrel buttonPressed camera barrels =
                     { location = initialBarrelLocation
                     , angle = (pi / 2)
                     , collisionRadius = 45
-                    , rotation = NoRotation { autoFire = False }
+                    , timeOccupied = 0
+                    , rotation = NoRotation (NoRotationSpec AutoFire)
                     , movement = NoMovement
                     }
             in

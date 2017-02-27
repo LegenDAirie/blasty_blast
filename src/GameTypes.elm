@@ -39,6 +39,7 @@ type alias Barrel =
     { location : Vector
     , angle : Float
     , collisionRadius : Int
+    , timeOccupied : Float
     , rotation : Rotation
     , movement : Movement
     }
@@ -84,14 +85,16 @@ type alias NoRotationSpec =
 
 
 type alias AutoWithNoControlSpec =
-    { range : Vector
+    { setToFire : Bool
+    , range : Vector
     , clockWise : Bool
     , rotationStyle : RotationStyle
     }
 
 
 type alias AutoWithDirectionControlSpec =
-    { clockWise : Bool
+    { setToFire : Bool
+    , clockWise : Bool
     }
 
 
@@ -102,13 +105,13 @@ type alias AutoRotateToAndStopSpec =
 
 
 type alias ManualRotationSpec =
-    { range : Vector
+    { setToFire : Bool
+    , range : Vector
     }
 
 
 type alias ManualTimedFireSpec =
-    { currentCountDown : Float
-    , delay : Float
+    { maxTimeOccupied : Float
     }
 
 
@@ -118,12 +121,12 @@ type RotationStyle
 
 
 type FireType
-    = AutoFire CountDownTimer
-    | ManualFire
+    = AutoFire
+    | ManualFire SetToFire
 
 
-type alias CountDownTimer =
-    Float
+type alias SetToFire =
+    Bool
 
 
 

@@ -39,11 +39,8 @@ updatePlayer deltaTime activeElement buttonsPressed player =
                         | location = barrel.location
                         , velocity = ( 0, 0 )
                     }
-
-                autoFire =
-                    shouldBarrelFire barrel
             in
-                if buttonsPressed.fire == Pressed || autoFire then
+                if shouldBarrelFire barrel then
                     fireFromBarrel barrel playerInBarrel
                 else
                     playerInBarrel

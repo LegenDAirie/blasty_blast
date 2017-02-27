@@ -37,7 +37,7 @@ updateRotation dt activeElement controls barrel =
         ManualRotation { range } ->
             barrel
 
-        ManualTimedFire { currentCountDown, delay } ->
+        ManualTimedFire { maxTimeOccupied } ->
             barrel
 
 
@@ -59,40 +59,42 @@ shouldBarrelFire barrel =
     case barrel.rotation of
         NoRotation { fireType } ->
             case fireType of
-                AutoFire countDownTimer ->
-                    if countDownTimer <= 0 then
-                        True
-                    else
-                        False
+                AutoFire ->
+                    exceededMinTimeOccupiedToFire barrel.timeOccupied
 
-                ManualFire ->
-                    False
+                ManualFire setToFire ->
+                    setToFire && exceededMinTimeOccupiedToFire barrel.timeOccupied
 
         AutoRotateToAndStop { fireType, endAngle } ->
             case fireType of
-                AutoFire countDownTimer ->
-                    if countDownTimer <= 0 then
-                        True
-                    else
-                        False
+                AutoFire ->
+                    exceededMinTimeOccupiedToFire barrel.timeOccupied
 
-                ManualFire ->
-                    False
+                ManualFire setToFire ->
+                    setToFire && exceededMinTimeOccupiedToFire barrel.timeOccupied
 
-        ManualTimedFire { currentCountDown, delay } ->
-            if currentCountDown <= 0 then
+        ManualTimedFire { maxTimeOccupied } ->
+            if maxTimeOccupied <= 0 then
                 True
             else
                 False
 
-        AutoWithNoControl spec ->
-            False
+        AutoWithNoControl { setToFire } ->
+            setToFire && exceededMinTimeOccupiedToFire barrel.timeOccupied
 
-        AutoWithDirectionControl spec ->
-            False
+        AutoWithDirectionControl { setToFire } ->
+            setToFire && exceededMinTimeOccupiedToFire barrel.timeOccupied
 
-        ManualRotation spec ->
-            False
+        ManualRotation { setToFire } ->
+            setToFire && exceededMinTimeOccupiedToFire barrel.timeOccupied
+
+
+exceededMinTimeOccupiedToFire : Float -> Bool
+exceededMinTimeOccupiedToFire timeOccupied =
+    if timeOccupied >= 100 then
+        True
+    else
+        False
 
 
 
@@ -115,13 +117,11 @@ shouldBarrelFire barrel =
 --     { model
 --         | barrels = updateBarrel transformBarrel model.barrels barrel
 --     }
-
-
-rotate : Float -> (Barrel -> Barrel)
-rotate offsetAngle barrel =
-    { barrel
-        | angle = barrel.angle + offsetAngle
-    }
+-- rotate : Float -> (Barrel -> Barrel)
+-- rotate offsetAngle barrel =
+--     { barrel
+--         | angle = barrel.angle + offsetAngle
+--     }
 
 
 renderBarrel : Barrel -> Renderable
