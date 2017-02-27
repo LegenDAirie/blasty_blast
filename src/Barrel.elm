@@ -13,10 +13,11 @@ updateBarrels dt activeElement controls barrels =
 
 
 updateBarrel : DeltaTime -> ActiveElement -> PlayerControls -> Barrel -> Barrel
-updateBarrel dt activeElement controls barrel =
+updateBarrel deltaTime activeElement controls barrel =
     barrel
-        |> (updateRotation dt activeElement controls)
-        |> (updateMovement dt activeElement)
+        |> (updateTimeOccupied deltaTime activeElement)
+        |> (updateRotation deltaTime activeElement controls)
+        |> (updateMovement deltaTime activeElement)
 
 
 updateRotation : DeltaTime -> ActiveElement -> PlayerControls -> Barrel -> Barrel
@@ -52,6 +53,25 @@ updateMovement dt activeElement barrel =
 
         CirclePath { trackRadius, clockWiseMovement } ->
             barrel
+
+
+updateTimeOccupied : DeltaTime -> ActiveElement -> Barrel -> Barrel
+updateTimeOccupied deltaTime activeElement barrel =
+    case activeElement of
+        ThePlayer ->
+            { barrel
+                | timeOccupied = 0
+            }
+
+        ThisBarrel activeBarrel ->
+            if activeBarrel == barrel then
+                { barrel
+                    | timeOccupied = barrel.timeOccupied + deltaTime
+                }
+            else
+                { barrel
+                    | timeOccupied = 0
+                }
 
 
 shouldBarrelFire : Barrel -> Bool
@@ -91,7 +111,7 @@ shouldBarrelFire barrel =
 
 exceededMinTimeOccupiedToFire : Float -> Bool
 exceededMinTimeOccupiedToFire timeOccupied =
-    if timeOccupied >= 100 then
+    if timeOccupied >= 0.5 then
         True
     else
         False
