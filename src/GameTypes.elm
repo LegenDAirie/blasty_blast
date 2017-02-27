@@ -79,7 +79,7 @@ type Rotation
 
 
 type alias NoRotationSpec =
-    { autoFire : Bool
+    { fireType : FireType
     }
 
 
@@ -96,7 +96,7 @@ type alias AutoWithDirectionControlSpec =
 
 
 type alias AutoRotateToAndStopSpec =
-    { autoFire : Bool
+    { fireType : FireType
     , endAngle : Vector
     }
 
@@ -107,13 +107,23 @@ type alias ManualRotationSpec =
 
 
 type alias ManualTimedFireSpec =
-    { timeTillFire : Float
+    { currentCountDown : Float
+    , delay : Float
     }
 
 
 type RotationStyle
     = Continuous
     | InSteps
+
+
+type FireType
+    = AutoFire CountDownTimer
+    | ManualFire
+
+
+type alias CountDownTimer =
+    Float
 
 
 

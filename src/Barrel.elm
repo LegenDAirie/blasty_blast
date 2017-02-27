@@ -22,7 +22,7 @@ updateBarrel dt activeElement controls barrel =
 updateRotation : DeltaTime -> ActiveElement -> PlayerControls -> Barrel -> Barrel
 updateRotation dt activeElement controls barrel =
     case barrel.rotation of
-        NoRotation { autoFire } ->
+        NoRotation { fireType } ->
             barrel
 
         AutoWithNoControl { range, clockWise, rotationStyle } ->
@@ -31,36 +31,14 @@ updateRotation dt activeElement controls barrel =
         AutoWithDirectionControl { clockWise } ->
             barrel
 
-        AutoRotateToAndStop { autoFire, endAngle } ->
+        AutoRotateToAndStop { fireType, endAngle } ->
             barrel
 
         ManualRotation { range } ->
             barrel
 
-        ManualTimedFire { timeTillFire } ->
+        ManualTimedFire { currentCountDown, delay } ->
             barrel
-
-
-shouldBarrelFire : Barrel -> Bool
-shouldBarrelFire barrel =
-    case barrel.rotation of
-        NoRotation { autoFire } ->
-            False
-
-        AutoRotateToAndStop { autoFire, endAngle } ->
-            False
-
-        ManualTimedFire { timeTillFire } ->
-            False
-
-        AutoWithNoControl spec ->
-            False
-
-        AutoWithDirectionControl spec ->
-            False
-
-        ManualRotation spec ->
-            False
 
 
 updateMovement : DeltaTime -> ActiveElement -> Barrel -> Barrel
@@ -74,6 +52,47 @@ updateMovement dt activeElement barrel =
 
         CirclePath { trackRadius, clockWiseMovement } ->
             barrel
+
+
+shouldBarrelFire : Barrel -> Bool
+shouldBarrelFire barrel =
+    case barrel.rotation of
+        NoRotation { fireType } ->
+            case fireType of
+                AutoFire countDownTimer ->
+                    if countDownTimer <= 0 then
+                        True
+                    else
+                        False
+
+                ManualFire ->
+                    False
+
+        AutoRotateToAndStop { fireType, endAngle } ->
+            case fireType of
+                AutoFire countDownTimer ->
+                    if countDownTimer <= 0 then
+                        True
+                    else
+                        False
+
+                ManualFire ->
+                    False
+
+        ManualTimedFire { currentCountDown, delay } ->
+            if currentCountDown <= 0 then
+                True
+            else
+                False
+
+        AutoWithNoControl spec ->
+            False
+
+        AutoWithDirectionControl spec ->
+            False
+
+        ManualRotation spec ->
+            False
 
 
 
