@@ -4,6 +4,7 @@ import Game.TwoD.Render as Render exposing (Renderable)
 import Vector2 as V2 exposing (getX, getY)
 import Color
 import GameTypes exposing (..)
+import Button exposing (ButtonState(..))
 
 
 updateBarrels : DeltaTime -> ActiveElement -> PlayerControls -> List Barrel -> List Barrel
@@ -14,17 +15,80 @@ updateBarrels dt activeElement controls barrels =
 
 updateBarrel : DeltaTime -> ActiveElement -> PlayerControls -> Barrel -> Barrel
 updateBarrel deltaTime activeElement controls barrel =
+    case activeElement of
+        ThePlayer ->
+            updateNonActiveBarrel deltaTime barrel
+
+        ThisBarrel activeBarrel ->
+            if activeBarrel == barrel then
+                updateActiveBarrel deltaTime controls barrel
+            else
+                updateNonActiveBarrel deltaTime barrel
+
+
+updateNonActiveBarrel : DeltaTime -> Barrel -> Barrel
+updateNonActiveBarrel deltaTime barrel =
     barrel
-        |> (updateTimeOccupied deltaTime activeElement)
-        |> (updateRotation deltaTime activeElement controls)
-        |> (updateMovement deltaTime activeElement)
+        |> (\barrel -> { barrel | timeOccupied = 0 })
+        |> (\barrel -> { barrel | rotation = inactiveRotationSpec barrel.rotation })
+        |> updateMovement deltaTime
 
 
-updateRotation : DeltaTime -> ActiveElement -> PlayerControls -> Barrel -> Barrel
-updateRotation dt activeElement controls barrel =
+updateActiveBarrel : DeltaTime -> PlayerControls -> Barrel -> Barrel
+updateActiveBarrel deltaTime controls barrel =
+    barrel
+        |> (\barrel -> { barrel | timeOccupied = barrel.timeOccupied + deltaTime })
+        |> updateRotation deltaTime controls
+        |> updateMovement deltaTime
+
+
+inactiveRotationSpec : Rotation -> Rotation
+inactiveRotationSpec rotation =
+    case rotation of
+        NoRotation { fireType } ->
+            case fireType of
+                AutoFire ->
+                    NoRotation (NoRotationSpec AutoFire)
+
+                ManualFire setToFire ->
+                    NoRotation (NoRotationSpec (ManualFire False))
+
+        AutoWithNoControl { setToFire } ->
+            NoRotation (NoRotationSpec AutoFire)
+
+        AutoWithDirectionControl { setToFire } ->
+            NoRotation (NoRotationSpec AutoFire)
+
+        AutoRotateToAndStop { fireType } ->
+            NoRotation (NoRotationSpec AutoFire)
+
+        ManualRotation { setToFire } ->
+            NoRotation (NoRotationSpec AutoFire)
+
+        ManualTimedFire { maxTimeOccupied } ->
+            NoRotation (NoRotationSpec AutoFire)
+
+
+updateRotation : DeltaTime -> PlayerControls -> Barrel -> Barrel
+updateRotation dt controls barrel =
     case barrel.rotation of
         NoRotation { fireType } ->
-            barrel
+            case fireType of
+                AutoFire ->
+                    barrel
+
+                ManualFire setToFire ->
+                    case setToFire of
+                        True ->
+                            barrel
+
+                        False ->
+                            if controls.fire == Pressed then
+                                { barrel
+                                    | rotation = NoRotation (NoRotationSpec (ManualFire True))
+                                }
+                            else
+                                barrel
 
         AutoWithNoControl { range, clockWise, rotationStyle } ->
             barrel
@@ -42,8 +106,8 @@ updateRotation dt activeElement controls barrel =
             barrel
 
 
-updateMovement : DeltaTime -> ActiveElement -> Barrel -> Barrel
-updateMovement dt activeElement barrel =
+updateMovement : DeltaTime -> Barrel -> Barrel
+updateMovement dt barrel =
     case barrel.movement of
         NoMovement ->
             barrel
@@ -53,25 +117,6 @@ updateMovement dt activeElement barrel =
 
         CirclePath { trackRadius, clockWiseMovement } ->
             barrel
-
-
-updateTimeOccupied : DeltaTime -> ActiveElement -> Barrel -> Barrel
-updateTimeOccupied deltaTime activeElement barrel =
-    case activeElement of
-        ThePlayer ->
-            { barrel
-                | timeOccupied = 0
-            }
-
-        ThisBarrel activeBarrel ->
-            if activeBarrel == barrel then
-                { barrel
-                    | timeOccupied = barrel.timeOccupied + deltaTime
-                }
-            else
-                { barrel
-                    | timeOccupied = 0
-                }
 
 
 shouldBarrelFire : Barrel -> Bool

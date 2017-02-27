@@ -70,7 +70,7 @@ initialBarrelOne =
     , angle = (pi / 2)
     , collisionRadius = 45
     , timeOccupied = 0
-    , rotation = NoRotation (NoRotationSpec AutoFire)
+    , rotation = NoRotation (NoRotationSpec (ManualFire False))
     , movement = NoMovement
     }
 
@@ -81,7 +81,7 @@ initialBarrelTwo =
     , angle = (pi / 2)
     , collisionRadius = 45
     , timeOccupied = 0
-    , rotation = NoRotation (NoRotationSpec AutoFire)
+    , rotation = NoRotation (NoRotationSpec (ManualFire False))
     , movement = NoMovement
     }
 
