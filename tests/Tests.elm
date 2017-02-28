@@ -165,9 +165,9 @@ all =
                 \() ->
                     nearestPiOverFour (3.2 * pi / 2)
                         |> Expect.equal (3 * pi / 2)
-            , test "Nearest pi/4 of 3.5pi/2 is 7pi/8" <|
+            , test "Nearest pi/4 of 3.25pi/2 is 7pi/4" <|
                 \() ->
                     nearestPiOverFour (3.25 * pi / 2)
-                        |> Expect.equal (7 * pi / 8)
+                        |> Expect.equal (7 * pi / 4)
             ]
         ]

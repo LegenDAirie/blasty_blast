@@ -160,10 +160,16 @@ updateRotation deltaTime controls barrel =
                         barrel.angle - deltaTime * 5
                     else
                         barrel.angle + deltaTime * 5
+
+                setAngle =
+                    if controls.fire == Pressed && exceededMinTimeOccupiedToFire barrel.timeOccupied then
+                        nearestPiOverFour newAngle
+                    else
+                        newAngle
             in
                 { barrel
                     | rotation = newRotation
-                    , angle = newAngle
+                    , angle = setAngle
                 }
 
         AutoWithDirectionControl { setToFire, clockWise } ->
