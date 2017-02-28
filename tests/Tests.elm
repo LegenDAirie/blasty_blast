@@ -3,9 +3,10 @@ module Tests exposing (..)
 import Test exposing (..)
 import Expect
 import String
-import GameTypes exposing (Player, Barrel)
+import GameTypes exposing (..)
 import Button exposing (ButtonState(..))
 import GameLogic exposing (hasPlayerCollided, touchIsCollidingWithBarrel, areAnyBarrelsInTheWay)
+import Barrel exposing (nearestPiOverFour)
 import Screens.LevelCreationScreen exposing (isScreenBeingScrolled)
 
 
@@ -28,7 +29,7 @@ all =
                             Player ( 2, 3 ) ( 0, 0 ) 1
 
                         barrel =
-                            Barrel ( 3, 2 ) (pi / 4) 1
+                            Barrel ( 3, 2 ) (pi / 4) 1 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
                     in
                         Expect.true "Expected collision" (hasPlayerCollided player barrel)
             , test "collision" <|
@@ -38,14 +39,15 @@ all =
                             Player ( 7, 4 ) ( 0, 0 ) 1
 
                         barrel =
-                            Barrel ( 9, 3 ) (pi / 4) 1
+                            Barrel ( 9, 3 ) (pi / 4) 1 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
                     in
                         Expect.false "Expected no collision" (hasPlayerCollided player barrel)
             ]
         , describe "Game Logic Helper Functions"
             [ test "touch colliding with barrel" <|
                 \() ->
-                    touchIsCollidingWithBarrel ( 3, 2 ) (Barrel ( 3, 2 ) 0 2)
+                    Barrel ( 3, 2 ) 0 2 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
+                        |> touchIsCollidingWithBarrel ( 3, 2 )
                         |> Expect.true "Expected a barrel in the way"
             , test "touchs colliding with barrels" <|
                 \() ->
@@ -54,10 +56,10 @@ all =
                             [ ( 3, 2 ), ( 7, 4 ) ]
 
                         barrelOne =
-                            Barrel ( 4, 2 ) 0 2
+                            Barrel ( 4, 2 ) 0 2 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
 
                         barrelTwo =
-                            Barrel ( 0, 0 ) 0 2
+                            Barrel ( 0, 0 ) 0 2 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
 
                         barrels =
                             [ barrelOne, barrelTwo ]
@@ -70,10 +72,10 @@ all =
                             [ ( 4, 7 ), ( 7, 4 ) ]
 
                         barrelOne =
-                            Barrel ( 20, 20 ) 0 2
+                            Barrel ( 20, 20 ) 0 2 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
 
                         barrelTwo =
-                            Barrel ( 30, 30 ) 0 2
+                            Barrel ( 30, 30 ) 0 2 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
 
                         barrels =
                             [ barrelOne, barrelTwo ]
@@ -86,10 +88,10 @@ all =
                             [ ( 4, 7 ), ( 7, 4 ) ]
 
                         barrelOne =
-                            Barrel ( 20, 20 ) 0 2
+                            Barrel ( 20, 20 ) 0 2 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
 
                         barrelTwo =
-                            Barrel ( 30, 30 ) 0 2
+                            Barrel ( 30, 30 ) 0 2 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
 
                         barrels =
                             [ barrelOne, barrelTwo ]
@@ -108,10 +110,10 @@ all =
                             [ ( 4, 7 ), ( 7, 4 ) ]
 
                         barrelOne =
-                            Barrel ( 20, 20 ) 0 2
+                            Barrel ( 20, 20 ) 0 2 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
 
                         barrelTwo =
-                            Barrel ( 30, 30 ) 0 2
+                            Barrel ( 30, 30 ) 0 2 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
 
                         barrels =
                             [ barrelOne, barrelTwo ]
@@ -130,10 +132,10 @@ all =
                             [ ( 20, 20 ), ( 7, 4 ) ]
 
                         barrelOne =
-                            Barrel ( 20, 20 ) 0 2
+                            Barrel ( 20, 20 ) 0 2 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
 
                         barrelTwo =
-                            Barrel ( 30, 30 ) 0 2
+                            Barrel ( 30, 30 ) 0 2 0 (NoRotation (NoRotationSpec (ManualFire False))) NoMovement
 
                         barrels =
                             [ barrelOne, barrelTwo ]
@@ -145,5 +147,27 @@ all =
                     in
                         isScreenBeingScrolled touches barrels editModeButtons
                             |> Expect.false "Barrel in the way should fail test"
+            ]
+        , describe "Nearest Pi Over Four"
+            [ test "Nearest pi/4 of pi/2.1 is pi/2" <|
+                \() ->
+                    nearestPiOverFour (pi / 2.1)
+                        |> Expect.equal (pi / 2)
+            , test "Nearest pi/4 of pi/1.9 is pi/2" <|
+                \() ->
+                    nearestPiOverFour (pi / 1.9)
+                        |> Expect.equal (pi / 2)
+            , test "Nearest pi/4 of 0 is 0" <|
+                \() ->
+                    nearestPiOverFour (pi / 0)
+                        |> Expect.equal (pi / 0)
+            , test "Nearest pi/4 of 3.2pi/2 is 3pi/2" <|
+                \() ->
+                    nearestPiOverFour (3.2 * pi / 2)
+                        |> Expect.equal (3 * pi / 2)
+            , test "Nearest pi/4 of 3.5pi/2 is 7pi/8" <|
+                \() ->
+                    nearestPiOverFour (3.25 * pi / 2)
+                        |> Expect.equal (7 * pi / 8)
             ]
         ]

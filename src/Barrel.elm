@@ -1,4 +1,4 @@
-module Barrel exposing (renderBarrel, updateBarrels, shouldBarrelFire)
+module Barrel exposing (renderBarrel, updateBarrels, shouldBarrelFire, nearestPiOverFour)
 
 import Game.TwoD.Render as Render exposing (Renderable)
 import Vector2 as V2 exposing (getX, getY)
@@ -308,6 +308,14 @@ exceededMinTimeOccupiedToFire timeOccupied =
         True
     else
         False
+
+
+nearestPiOverFour : Float -> Float
+nearestPiOverFour angle =
+    angle
+        |> (\number -> number / (pi / 4))
+        |> round
+        |> (\number -> toFloat number * (pi / 4))
 
 
 
