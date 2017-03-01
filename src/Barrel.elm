@@ -201,6 +201,12 @@ updateRotation deltaTime controls barrel =
                         barrel.angle - deltaTime * 5
                     else
                         barrel.angle + deltaTime * 5
+
+                setAngle =
+                    if controls.fire == Pressed && exceededMinTimeOccupiedToFire barrel.timeOccupied then
+                        nearestPiOverFour newAngle
+                    else
+                        newAngle
             in
                 { barrel
                     | rotation = newRotation
@@ -230,10 +236,16 @@ updateRotation deltaTime controls barrel =
                         clamp minAngle maxAngle barrel.angle + deltaTime * 5
                     else
                         barrel.angle
+
+                setAngle =
+                    if controls.fire == Pressed && exceededMinTimeOccupiedToFire barrel.timeOccupied then
+                        nearestPiOverFour newAngle
+                    else
+                        newAngle
             in
                 { barrel
                     | rotation = newRotation
-                    , angle = newAngle
+                    , angle = setAngle
                 }
 
         ManualTimedFire { setToFire, maxTimeOccupied } ->
@@ -256,10 +268,16 @@ updateRotation deltaTime controls barrel =
                         barrel.angle - deltaTime * 5
                     else
                         barrel.angle
+
+                setAngle =
+                    if controls.fire == Pressed && exceededMinTimeOccupiedToFire barrel.timeOccupied then
+                        nearestPiOverFour newAngle
+                    else
+                        newAngle
             in
                 { barrel
                     | rotation = newRotation
-                    , angle = newAngle
+                    , angle = setAngle
                 }
 
 
