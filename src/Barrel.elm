@@ -3,6 +3,7 @@ module Barrel exposing (renderBarrel, updateBarrels, shouldBarrelFire, nearestPi
 import Game.TwoD.Render as Render exposing (Renderable)
 import Vector2 as V2 exposing (getX, getY)
 import Color
+import Ease
 import GameTypes exposing (..)
 import Button exposing (ButtonState(..))
 
@@ -31,7 +32,7 @@ updateNonActiveBarrel deltaTime barrel =
     { barrel
         | timeOccupied = 0
         , rotation = inactiveRotationSpec barrel.rotation
-        , movement = updateMovementSpec deltaTime barrel.movement
+        , location = updateMovement barrel.timeOccupied barrel.movement barrel.location
     }
 
 
@@ -39,7 +40,7 @@ updateActiveBarrel : DeltaTime -> PlayerControls -> Barrel -> Barrel
 updateActiveBarrel deltaTime controls barrel =
     { barrel
         | timeOccupied = barrel.timeOccupied + deltaTime
-        , movement = updateMovementSpec deltaTime barrel.movement
+        , location = updateMovement barrel.timeOccupied barrel.movement barrel.location
     }
         |> updateRotation deltaTime controls
 
@@ -281,17 +282,42 @@ updateRotation deltaTime controls barrel =
                 }
 
 
-updateMovementSpec : DeltaTime -> Movement -> Movement
-updateMovementSpec deltaTime movement =
+updateMovement : Float -> Movement -> Vector -> Vector
+updateMovement timeOccupied movement location =
     case movement of
         NoMovement ->
-            movement
+            location
 
         LinePath { startNode, endNode, startingDirection, speed } ->
-            movement
+            let
+                -- _ =
+                --     Debug.log "startNode" startNode
+                --
+                -- _ =
+                --     Debug.log "endNode" endNode
+                halfWayPoint =
+                    V2.sub endNode startNode
+                        |> V2.divideBy 2
+
+                -- _ =
+                --     Debug.log "halfWayPoint" halfWayPoint
+                -- _ =
+                --     Debug.log "time occupied" timeOccupied
+                -- halfDistance =
+                --     (getX endNode - getX startNode) / 2
+                newLocation =
+                    halfWayPoint
+                        |> V2.scale (sin (timeOccupied * 4))
+                        |> V2.add startNode
+                        |> V2.add halfWayPoint
+
+                -- _ =
+                --     Debug.log "x" (sin timeOccupied)
+            in
+                newLocation
 
         CirclePath { trackRadius, clockWiseMovement } ->
-            movement
+            location
 
 
 shouldBarrelFire : Barrel -> Bool

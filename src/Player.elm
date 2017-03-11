@@ -92,7 +92,7 @@ fireFromBarrel : Barrel -> Player -> Player
 fireFromBarrel barrel player =
     let
         minDistanceApart =
-            toFloat (barrel.collisionRadius + player.collisionRadius)
+            toFloat (barrel.collisionRadius + player.collisionRadius) + 20
 
         directionVector =
             ( cos barrel.angle, sin barrel.angle )

@@ -75,59 +75,63 @@ initialBarrelOne =
     }
 
 
-initialBarrelTwo : Barrel
-initialBarrelTwo =
-    { location = ( 300, -100 )
-    , angle = (pi / 2)
-    , collisionRadius = 45
-    , timeOccupied = 0
-    , rotation = AutoWithNoControl (AutoWithNoControlSpec False ( 0, pi ) True Continuous)
-    , movement = NoMovement
-    }
+
+--
+--
+-- initialBarrelTwo : Barrel
+-- initialBarrelTwo =
+--     { location = ( 300, -100 )
+--     , angle = (pi / 2)
+--     , collisionRadius = 45
+--     , timeOccupied = 0
+--     , rotation = AutoWithNoControl (AutoWithNoControlSpec False ( 0, pi ) True Continuous)
+--     , movement = NoMovement
+--     }
 
 
 initialBarrelThree : Barrel
 initialBarrelThree =
-    { location = ( 600, -100 )
+    { location = ( 0, -150 )
     , angle = (pi / 2)
     , collisionRadius = 45
     , timeOccupied = 0
     , rotation = AutoWithDirectionControl (AutoWithDirectionControlSpec False True)
-    , movement = NoMovement
+    , movement = LinePath (LineMovementSpec ( 400, -250 ) ( 400, 250 ) LeftOrDown 1)
     }
 
 
-initialBarrelFour : Barrel
-initialBarrelFour =
-    { location = ( 800, -100 )
-    , angle = pi
-    , collisionRadius = 45
-    , timeOccupied = 0
-    , rotation = AutoRotateToAndStop (AutoRotateToAndStopSpec AutoFire (pi / 4))
-    , movement = NoMovement
-    }
 
-
-initialBarrelFive : Barrel
-initialBarrelFive =
-    { location = ( -300, -100 )
-    , angle = pi
-    , collisionRadius = 45
-    , timeOccupied = 0
-    , rotation = ManualRotation (ManualRotationSpec False ( 0, 3 * pi / 2 ))
-    , movement = NoMovement
-    }
-
-
-initialBarrelSix : Barrel
-initialBarrelSix =
-    { location = ( -600, -100 )
-    , angle = pi
-    , collisionRadius = 45
-    , timeOccupied = 0
-    , rotation = ManualTimedFire (ManualTimedFireSpec False 2)
-    , movement = NoMovement
-    }
+-- initialBarrelFour : Barrel
+-- initialBarrelFour =
+--     { location = ( 800, -100 )
+--     , angle = pi
+--     , collisionRadius = 45
+--     , timeOccupied = 0
+--     , rotation = AutoRotateToAndStop (AutoRotateToAndStopSpec AutoFire (pi / 4))
+--     , movement = NoMovement
+--     }
+--
+--
+-- initialBarrelFive : Barrel
+-- initialBarrelFive =
+--     { location = ( -300, -100 )
+--     , angle = pi
+--     , collisionRadius = 45
+--     , timeOccupied = 0
+--     , rotation = ManualRotation (ManualRotationSpec False ( 0, 3 * pi / 2 ))
+--     , movement = NoMovement
+--     }
+--
+--
+-- initialBarrelSix : Barrel
+-- initialBarrelSix =
+--     { location = ( -600, -100 )
+--     , angle = pi
+--     , collisionRadius = 45
+--     , timeOccupied = 0
+--     , rotation = ManualTimedFire (ManualTimedFireSpec False 2)
+--     , movement = NoMovement
+--     }
 
 
 initialLevelCreateState : LevelCreateState
@@ -139,8 +143,10 @@ initialLevelCreateState =
         ( gameWidth, gameHeight ) =
             gameSize
     in
-        { player = Player startingPoint ( 0, 0 ) 45
-        , barrels = [ initialBarrelOne, initialBarrelTwo, initialBarrelThree, initialBarrelFour, initialBarrelFive, initialBarrelSix ]
+        { player =
+            Player startingPoint ( 0, 0 ) 45
+            -- , barrels = [ initialBarrelOne, initialBarrelTwo, initialBarrelThree, initialBarrelFour, initialBarrelFive, initialBarrelSix ]
+        , barrels = [ initialBarrelOne, initialBarrelThree ]
         , activeElement = ThePlayer
         , camera = Camera.fixedWidth gameWidth startingPoint
         , resources = Resources.init
@@ -172,11 +178,11 @@ updatePlayTestingMode deltaTime touchLocations state =
         playerButtonsPressed =
             calculatePlayerButtonsPressed touchLocations state.playerControls
 
-        newPlayer =
-            updatePlayer deltaTime state.activeElement playerButtonsPressed state.player
-
         newBarrels =
             updateBarrels deltaTime state.activeElement playerButtonsPressed state.barrels
+
+        newPlayer =
+            updatePlayer deltaTime state.activeElement playerButtonsPressed state.player
 
         newActiveElement =
             calculateActivePlayElement newPlayer newBarrels
